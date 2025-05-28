@@ -25,23 +25,20 @@ export function ErrorMessage({ message, onRetry, className = '' }: ErrorMessageP
           </svg>
         </div>
         <div className="ml-3">
-          <h3 className="text-sm font-medium text-red-800">Error</h3>
-          <div className="mt-2 text-sm text-red-700">
-            <p>{message}</p>
-          </div>
-          {onRetry && (
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={onRetry}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Try again
-              </button>
-            </div>
-          )}
+          <p className="text-sm font-medium text-red-800">{message}</p>
         </div>
       </div>
+      {onRetry && (
+        <div className="mt-4">
+          <button
+            type="button"
+            className="rounded bg-red-50 px-2 py-1.5 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-100"
+            onClick={onRetry}
+          >
+            Try again
+          </button>
+        </div>
+      )}
     </div>
   );
 } 

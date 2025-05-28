@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../utils/auth';
+import { useNavigate } from 'react-router-dom';
 
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, error, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await login(email, password);
+      navigate('/'); // Navigate to home page after successful login
     } catch (err) {
       // Error is handled by the auth context
     }

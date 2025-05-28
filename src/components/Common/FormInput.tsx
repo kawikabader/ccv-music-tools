@@ -3,15 +3,14 @@ import React from 'react';
 interface FormInputProps {
   label: string;
   name: string;
-  type?: string;
+  type?: 'text' | 'email' | 'tel' | 'textarea';
   value: string;
-  error?: string;
-  touched?: boolean;
   onChange: (name: string, value: string) => void;
   onBlur: (name: string) => void;
-  placeholder?: string;
+  error?: string;
+  touched?: boolean;
   required?: boolean;
-  className?: string;
+  placeholder?: string;
 }
 
 export function FormInput({
@@ -19,36 +18,50 @@ export function FormInput({
   name,
   type = 'text',
   value,
-  error,
-  touched,
   onChange,
   onBlur,
-  placeholder,
+  error,
+  touched,
   required,
-  className = '',
+  placeholder,
 }: FormInputProps): JSX.Element {
   const showError = touched && error;
+  const inputClasses = `block w-full rounded-md shadow-sm sm:text-sm ${showError
+      ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500'
+      : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+    }`;
 
   return (
-    <div className={className}>
+    <div>
       <label htmlFor={name} className="block text-sm font-medium text-gray-700">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       <div className="mt-1">
-        <input
-          type={type}
-          name={name}
-          id={name}
-          value={value}
-          onChange={(e) => onChange(name, e.target.value)}
-          onBlur={() => onBlur(name)}
-          placeholder={placeholder}
-          className={`block w-full rounded-md shadow-sm sm:text-sm ${showError
-              ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
-            }`}
-        />
+        {type === 'textarea' ? (
+          <textarea
+            id={name}
+            name={name}
+            rows={3}
+            className={inputClasses}
+            value={value}
+            onChange={(e) => onChange(name, e.target.value)}
+            onBlur={() => onBlur(name)}
+            placeholder={placeholder}
+          />
+        ) : (
+          <input
+            type={type}
+            id={name}
+            name={name}
+            className={inputClasses}
+            value={value}
+            onChange={(e) => onChange(name, e.target.value)}
+            onBlur={() => onBlur(name)}
+            placeholder={placeholder}
+            required={required}
+          />
+        )}
       </div>
       {showError && (
         <p className="mt-2 text-sm text-red-600" id={`${name}-error`}>

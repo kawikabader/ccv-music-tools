@@ -2,14 +2,14 @@
   "users": [
     {
       "id": "1",
-      "name": "John Smith",
+      "name": "John Doe",
       "email": "john@example.com",
       "password": "admin123",
       "role": "director"
     },
     {
       "id": "2",
-      "name": "Sarah Johnson",
+      "name": "Sarah Smith",
       "email": "sarah@example.com",
       "password": "admin123",
       "role": "director"
@@ -19,7 +19,7 @@
       "name": "Admin User",
       "email": "admin@example.com",
       "password": "admin123",
-      "role": "director"
+      "role": "admin"
     }
   ]
 }

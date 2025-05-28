@@ -1,11 +1,18 @@
 // Shared types placeholder
 
-export type UserRole = 'director';
+export interface Musician {
+  id: string;
+  name: string;
+  instrument?: string;
+  phone: string;
+}
+
+export type UserRole = 'director' | 'admin';
 
 export interface User {
   id: string;
-  name: string;
   email: string;
+  name: string;
   role: UserRole;
 }
 
@@ -16,14 +23,4 @@ export interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-}
-
-export interface Musician {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  instruments: string[];
-  availability: string[];
-  notes?: string;
 }
