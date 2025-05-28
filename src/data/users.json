@@ -13,6 +13,13 @@
       "email": "sarah@example.com",
       "password": "hashed_password_here",
       "role": "director"
+    },
+    {
+      "id": "3",
+      "name": "Admin User",
+      "email": "admin@example.com",
+      "password": "admin123",
+      "role": "director"
     }
   ]
 }
