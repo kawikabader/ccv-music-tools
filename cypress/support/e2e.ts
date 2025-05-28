@@ -1,9 +1,10 @@
+/// <reference types="cypress" />
 import '@testing-library/cypress/add-commands';
 
 // Custom commands for authentication
-Cypress.Commands.add('login', (email: string, password: string) => {
+Cypress.Commands.add('login', (username: string, password: string) => {
   cy.visit('/login');
-  cy.get('input[name="email"]').type(email);
+  cy.get('input[name="username"]').type(username);
   cy.get('input[name="password"]').type(password);
   cy.get('button[type="submit"]').click();
 });
@@ -36,7 +37,7 @@ Cypress.Commands.add(
 declare global {
   namespace Cypress {
     interface Chainable {
-      login(email: string, password: string): Chainable<void>;
+      login(username: string, password: string): Chainable<void>;
       addMusician(musician: {
         name: string;
         instrument: string;

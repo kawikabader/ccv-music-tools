@@ -25,25 +25,25 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string) => {
     try {
       setIsLoading(true);
       setError(null);
 
       // Find user in JSON data
       const foundUser = users.find(
-        (u) => u.email === email && u.password === password
+        (u) => u.username === username && u.password === password
       );
 
       if (!foundUser) {
-        throw new Error('Invalid email or password');
+        throw new Error('Invalid username or password');
       }
 
       // Create user object without password
       const user: User = {
         id: foundUser.id,
         name: foundUser.name,
-        email: foundUser.email,
+        username: foundUser.username,
         role: foundUser.role as UserRole,
       };
 

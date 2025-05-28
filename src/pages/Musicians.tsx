@@ -10,7 +10,6 @@ export function Musicians(): JSX.Element {
     const searchLower = searchTerm.toLowerCase();
     return (
       musician.name.toLowerCase().includes(searchLower) ||
-      (musician.instrument?.toLowerCase().includes(searchLower) ?? false) ||
       musician.phone.toLowerCase().includes(searchLower.replace(/[^0-9]/g, ''))
     );
   });
@@ -35,7 +34,7 @@ export function Musicians(): JSX.Element {
           </div>
           <input
             type="text"
-            placeholder="Search by name, instrument, or phone number..."
+            placeholder="Search by name or phone number..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="block w-full rounded-lg border-0 py-3 pl-10 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 bg-white shadow-sm"
@@ -49,10 +48,7 @@ export function Musicians(): JSX.Element {
                 <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                   Name
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Instrument
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-40">
                   Phone
                 </th>
               </tr>
@@ -63,10 +59,7 @@ export function Musicians(): JSX.Element {
                   <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                     {musician.name}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    {musician.instrument || '—'}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  <td className="px-3 py-4 text-sm text-gray-500">
                     {musician.phone}
                   </td>
                 </tr>

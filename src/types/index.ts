@@ -11,7 +11,7 @@ export type UserRole = 'director' | 'admin';
 
 export interface User {
   id: string;
-  email: string;
+  username: string;
   name: string;
   role: UserRole;
 }
@@ -21,6 +21,6 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 }
