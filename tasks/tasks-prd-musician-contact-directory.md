@@ -8,17 +8,21 @@
 * `src/components/MusicianList/MusicianList.test.tsx` - Musician list tests
 * `src/components/Admin/AdminPanel.tsx` - Admin interface component
 * `src/components/Admin/AdminPanel.test.tsx` - Admin panel tests
-* `src/data/musicians.json` - Musician data storage
-* `src/data/users.json` - User data storage
-* `src/utils/auth.ts` - Authentication utilities
+* `src/data/musicians.json` - Musician data storage (placeholder)
+* `src/data/users.json` - User data storage (placeholder)
+* `src/utils/auth.ts` - Authentication utilities (placeholder)
 * `src/utils/auth.test.ts` - Auth utilities tests
-* `src/utils/csv.ts` - CSV import/export utilities
+* `src/utils/csv.ts` - CSV import/export utilities (placeholder)
 * `src/utils/csv.test.ts` - CSV utilities tests
-* `src/types/index.ts` - TypeScript type definitions
+* `src/types/index.ts` - TypeScript type definitions (placeholder)
 * `tailwind.config.js` - Tailwind CSS configuration
 * `package.json` - Project dependencies
 * `tsconfig.json` - TypeScript configuration
 * `.github/workflows/deploy.yml` - GitHub Pages deployment workflow
+* `jest.config.js` - Jest configuration
+* `tsconfig.jest.json` - TypeScript config for Jest
+* `src/setupTests.ts` - Jest setup file
+* `test/__mocks__/fileMock.js` - Static asset mock for Jest
 
 ### Notes
 
@@ -33,8 +37,8 @@
   + [x] 1.1 Initialize React project with TypeScript
   + [x] 1.2 Set up Tailwind CSS
   + [x] 1.3 Configure GitHub Pages deployment
-  + [ ] 1.4 Set up testing environment (Jest + React Testing Library)
-  + [ ] 1.5 Create initial project structure and file organization
+  + [x] 1.4 Set up testing environment (Jest + React Testing Library)
+  + [x] 1.5 Create initial project structure and file organization
   + [ ] 1.6 Set up ESLint and Prettier
   + [ ] 1.7 Create basic README.md with setup instructions
 
