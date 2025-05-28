@@ -1,19 +1,16 @@
 ## Relevant Files
 
 * `src/App.tsx` - Main application component
-* `src/App.test.tsx` - Main application tests
-* `src/components/Auth/Login.tsx` - Login component
-* `src/components/Auth/Login.test.tsx` - Login component tests
-* `src/components/MusicianList/MusicianList.tsx` - Musician list and search component
-* `src/components/MusicianList/MusicianList.test.tsx` - Musician list tests
-* `src/components/Admin/AdminPanel.tsx` - Admin interface component
-* `src/components/Admin/AdminPanel.test.tsx` - Admin panel tests
+* `test/App.test.tsx` - Main application tests
+* `test/Login.test.tsx` - Login component tests
+* `test/MusicianList.test.tsx` - Musician list tests
+* `test/AdminPanel.test.tsx` - Admin panel tests
 * `src/data/musicians.json` - Musician data storage (placeholder)
 * `src/data/users.json` - User data storage (placeholder)
-* `src/utils/auth.ts` - Authentication utilities (placeholder)
-* `src/utils/auth.test.ts` - Auth utilities tests
-* `src/utils/csv.ts` - CSV import/export utilities (placeholder)
-* `src/utils/csv.test.ts` - CSV utilities tests
+* `src/utils/auth.tsx` - Authentication utilities
+* `test/auth.test.tsx` - Auth utilities tests
+* `src/utils/csv.ts` - CSV import/export utilities
+* `test/csv.test.ts` - CSV utilities tests
 * `src/types/index.ts` - TypeScript type definitions (placeholder)
 * `tailwind.config.js` - Tailwind CSS configuration
 * `package.json` - Project dependencies
@@ -22,11 +19,15 @@
 * `jest.config.js` - Jest configuration
 * `tsconfig.jest.json` - TypeScript config for Jest
 * `src/setupTests.ts` - Jest setup file
+* `test/Dashboard.test.tsx` - Dashboard page tests
+* `test/Musicians.test.tsx` - Musicians page tests
+* `test/MusicianForm.test.tsx` - Musician form tests
+* `test/PrivateRoute.test.tsx` - PrivateRoute component tests
 * `test/__mocks__/fileMock.js` - Static asset mock for Jest
 
 ### Notes
 
-* Unit tests should be placed alongside the code files they are testing
+* All test files are now located in the `test/` directory at the project root.
 * Use `npm test` to run all tests
 * Use `npm run build` to create production build
 * Use `npm run deploy` to deploy to GitHub Pages
