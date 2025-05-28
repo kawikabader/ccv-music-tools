@@ -1,87 +1,75 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import type { AuthContextType, AuthState, User } from '../types';
-import usersData from '../data/users.json';
-
-const initialState: AuthState = {
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  error: null,
-};
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { User, AuthContextType, UserRole } from '../types';
+import { users } from '../data/users.json';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }): React.ReactElement<typeof AuthContext.Provider> {
-  const [state, setState] = useState<AuthState>(initialState);
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for existing session
+    // Check for stored user data on mount
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setState({
-        user: JSON.parse(storedUser),
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
-    } else {
-      setState(prev => ({ ...prev, isLoading: false }));
+      setUser(JSON.parse(storedUser));
     }
+    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setIsLoading(true);
+      setError(null);
 
-      // Find user in our JSON data
-      const user = usersData.users.find(u => u.email === email && u.password === password);
+      // Find user in JSON data
+      const foundUser = users.find(
+        (u) => u.email === email && u.password === password
+      );
 
-      if (!user) {
+      if (!foundUser) {
         throw new Error('Invalid email or password');
       }
 
-      // Create a user object without the password
-      const userWithoutPassword: User = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        githubId: '', // Not used anymore
+      // Create user object without password
+      const user: User = {
+        id: foundUser.id,
+        name: foundUser.name,
+        email: foundUser.email,
+        role: foundUser.role as UserRole,
       };
 
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-      setState({
-        user: userWithoutPassword,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Authentication failed',
-      }));
+      // Store user in localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('user');
-    setState(initialState);
-  };
+    setUser(null);
+  }, []);
 
   const value: AuthContextType = {
-    ...state,
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    error,
     login,
     logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
@@ -90,4 +78,28 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+}
+
+export function useRequireAuth() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = '/login';
+    }
+  }, [isLoading, isAuthenticated]);
+
+  return useAuth();
+}
+
+export function useRequireRole(role: UserRole) {
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || user?.role !== role)) {
+      window.location.href = '/unauthorized';
+    }
+  }, [isLoading, isAuthenticated, user, role]);
+
+  return useAuth();
 } 

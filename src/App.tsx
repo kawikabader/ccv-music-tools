@@ -1,45 +1,39 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './utils/auth';
-import { Login } from './components/Login';
-import { Layout } from './components/Layout';
-import { Musicians } from './pages/Musicians';
+import { AuthProvider } from './utils/auth';
+import { Login } from './components/Auth/Login';
+import { Unauthorized } from './components/Auth/Unauthorized';
+import { PrivateRoute } from './components/Auth/PrivateRoute';
+import { Layout } from './components/Layout/Layout';
 import { Dashboard } from './pages/Dashboard';
-
-function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  return isAuthenticated ? <Layout>{children}</Layout> : <Navigate to="/login" />;
-}
+import { Musicians } from './pages/Musicians';
 
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
       <Route
         path="/"
         element={
-          <PrivateRoute>
-            <Dashboard />
+          <PrivateRoute requiredRole="director">
+            <Layout>
+              <Dashboard />
+            </Layout>
           </PrivateRoute>
         }
       />
       <Route
         path="/musicians"
         element={
-          <PrivateRoute>
-            <Musicians />
+          <PrivateRoute requiredRole="director">
+            <Layout>
+              <Musicians />
+            </Layout>
           </PrivateRoute>
         }
       />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

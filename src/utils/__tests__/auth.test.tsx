@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../auth';
+import { AuthProvider, useAuth, useRequireAuth, useRequireRole } from '../auth';
 import type { User, AuthContextType } from '../../types';
+import { UserRole } from '../../types';
 
 // Mock the auth context
 const mockAuthContext: AuthContextType = {
@@ -22,25 +23,51 @@ jest.mock('../auth', () => ({
   useAuth: () => mockAuthContext,
 }));
 
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: jest.fn((key: string) => store[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: jest.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+  };
+})();
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+// Mock window.location
+const originalLocation = window.location;
+delete window.location;
+window.location = { ...originalLocation, href: '' };
+
 const TestComponent = () => {
-  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
+  const { user, isAuthenticated, isLoading, error, login, logout } = useAuth();
   return (
     <div>
-      {isAuthenticated ? (
-        <>
-          <div>Welcome, {user?.name}!</div>
-          <button onClick={() => logout()}>Logout</button>
-        </>
-      ) : (
-        <button onClick={() => login('mock-code')}>Login with GitHub</button>
-      )}
+      <div data-testid="is-authenticated">{isAuthenticated.toString()}</div>
+      <div data-testid="is-loading">{isLoading.toString()}</div>
+      <div data-testid="error">{error}</div>
+      <div data-testid="user">{user ? JSON.stringify(user) : 'null'}</div>
+      <button onClick={() => login('test@example.com', 'password')}>Login</button>
+      <button onClick={logout}>Logout</button>
     </div>
   );
+};
+
+const RequireAuthComponent = () => {
+  const auth = useRequireAuth();
+  return <div data-testid="require-auth">{auth.isAuthenticated.toString()}</div>;
+};
+
+const RequireRoleComponent = () => {
+  const auth = useRequireRole('director');
+  return <div data-testid="require-role">{auth.user?.role}</div>;
 };
 
 describe('AuthContext', () => {
@@ -48,6 +75,8 @@ describe('AuthContext', () => {
     jest.clearAllMocks();
     mockAuthContext.user = null;
     mockAuthContext.isAuthenticated = false;
+    localStorage.clear();
+    window.location.href = '';
   });
 
   it('renders login button when not authenticated', () => {
@@ -119,5 +148,62 @@ describe('AuthContext', () => {
     fireEvent.click(screen.getByText('Logout'));
 
     expect(mockAuthContext.logout).toHaveBeenCalled();
+  });
+
+  it('provides authentication state', () => {
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    );
+
+    expect(screen.getByTestId('is-authenticated')).toHaveTextContent('false');
+    expect(screen.getByTestId('is-loading')).toHaveTextContent('false');
+    expect(screen.getByTestId('error')).toHaveTextContent('');
+    expect(screen.getByTestId('user')).toHaveTextContent('null');
+  });
+
+  it('handles login and logout', async () => {
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    );
+
+    // Login
+    await act(async () => {
+      screen.getByText('Login').click();
+    });
+
+    expect(localStorage.setItem).toHaveBeenCalled();
+    expect(screen.getByTestId('is-authenticated')).toHaveTextContent('true');
+
+    // Logout
+    await act(async () => {
+      screen.getByText('Logout').click();
+    });
+
+    expect(localStorage.removeItem).toHaveBeenCalled();
+    expect(screen.getByTestId('is-authenticated')).toHaveTextContent('false');
+  });
+
+  it('redirects when using useRequireAuth without authentication', () => {
+    render(
+      <AuthProvider>
+        <RequireAuthComponent />
+      </AuthProvider>
+    );
+
+    expect(window.location.href).toBe('/login');
+  });
+
+  it('redirects when using useRequireRole without correct role', () => {
+    render(
+      <AuthProvider>
+        <RequireRoleComponent />
+      </AuthProvider>
+    );
+
+    expect(window.location.href).toBe('/unauthorized');
   });
 }); 
