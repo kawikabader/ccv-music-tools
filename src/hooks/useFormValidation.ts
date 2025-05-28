@@ -1,51 +1,69 @@
 import { useState, useCallback } from 'react';
 
-interface ValidationRules {
-  [key: string]: {
-    required?: boolean;
-    pattern?: RegExp;
-    minLength?: number;
-    maxLength?: number;
-    custom?: (value: string) => boolean;
-    message?: string;
-  };
+interface ValidationRule {
+  required?: boolean;
+  minLength?: number;
+  pattern?: RegExp;
+  message: string;
 }
 
-interface ValidationErrors {
+interface ValidationRules {
+  [key: string]: ValidationRule;
+}
+
+interface FormValues {
+  [key: string]: string | string[];
+}
+
+interface FormErrors {
   [key: string]: string;
 }
 
-export function useFormValidation(
-  initialValues: { [key: string]: string },
+interface FormTouched {
+  [key: string]: boolean;
+}
+
+interface UseFormValidationReturn {
+  values: FormValues;
+  errors: FormErrors;
+  touched: FormTouched;
+  handleChange: (name: string, value: string) => void;
+  handleBlur: (name: string) => void;
+  validateForm: () => boolean;
+  resetForm: () => void;
+}
+
+/**
+ * Custom hook for form validation
+ * @param {FormValues} initialValues - Initial form values
+ * @param {ValidationRules} validationRules - Validation rules for each field
+ * @returns {UseFormValidationReturn} Form validation state and handlers
+ */
+export const useFormValidation = (
+  initialValues: FormValues,
   validationRules: ValidationRules
-) {
-  const [values, setValues] = useState(initialValues);
-  const [errors, setErrors] = useState<ValidationErrors>({});
-  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+): UseFormValidationReturn => {
+  const [values, setValues] = useState<FormValues>(initialValues);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<FormTouched>({});
 
   const validateField = useCallback(
-    (name: string, value: string) => {
-      const rules = validationRules[name];
-      if (!rules) return '';
+    (name: string, value: string | string[]) => {
+      const rule = validationRules[name];
+      if (!rule) return '';
 
-      if (rules.required && !value) {
-        return rules.message || `${name} is required`;
+      if (rule.required && (!value || (Array.isArray(value) && value.length === 0))) {
+        return rule.message;
       }
 
-      if (rules.pattern && !rules.pattern.test(value)) {
-        return rules.message || `${name} is invalid`;
-      }
+      if (typeof value === 'string') {
+        if (rule.minLength && value.length < rule.minLength) {
+          return rule.message;
+        }
 
-      if (rules.minLength && value.length < rules.minLength) {
-        return rules.message || `${name} must be at least ${rules.minLength} characters`;
-      }
-
-      if (rules.maxLength && value.length > rules.maxLength) {
-        return rules.message || `${name} must be at most ${rules.maxLength} characters`;
-      }
-
-      if (rules.custom && !rules.custom(value)) {
-        return rules.message || `${name} is invalid`;
+        if (rule.pattern && !rule.pattern.test(value)) {
+          return rule.message;
+        }
       }
 
       return '';
@@ -72,15 +90,19 @@ export function useFormValidation(
   );
 
   const validateForm = useCallback(() => {
-    const newErrors: ValidationErrors = {};
+    const newErrors: FormErrors = {};
+    let isValid = true;
+
     Object.keys(validationRules).forEach(name => {
       const error = validateField(name, values[name]);
       if (error) {
         newErrors[name] = error;
+        isValid = false;
       }
     });
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return isValid;
   }, [validateField, validationRules, values]);
 
   const resetForm = useCallback(() => {
@@ -97,6 +119,5 @@ export function useFormValidation(
     handleBlur,
     validateForm,
     resetForm,
-    setValues,
   };
-}
+};

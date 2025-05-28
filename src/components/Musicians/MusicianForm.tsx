@@ -1,22 +1,25 @@
 import React from 'react';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { FormInput } from '../Common/FormInput';
+import type { Musician } from '../../types';
 
+/**
+ * Props for the MusicianForm component
+ * @interface MusicianFormProps
+ * @property {Musician} [initialValues] - Initial values for the form when editing an existing musician
+ * @property {function} onSubmit - Callback function when form is submitted with valid data
+ * @property {function} onCancel - Callback function when form submission is cancelled
+ */
 interface MusicianFormProps {
-  initialValues?: {
-    name: string;
-    instrument: string;
-    email: string;
-    phone: string;
-    experience: string;
-    availability: string;
-    notes: string;
-    status: 'active' | 'inactive';
-  };
-  onSubmit: (values: any) => void;
+  initialValues?: Musician;
+  onSubmit: (values: Musician) => void;
   onCancel: () => void;
 }
 
+/**
+ * Form validation rules for musician data
+ * @constant
+ */
 const validationRules = {
   name: {
     required: true,
@@ -47,18 +50,34 @@ const validationRules = {
   },
 };
 
-const defaultValues = {
-  name: '',
-  instrument: '',
-  email: '',
-  phone: '',
-  experience: '',
-  availability: '',
-  notes: '',
-  status: 'active' as const,
-};
+/**
+ * MusicianForm Component
+ * 
+ * A form component for adding or editing musician information.
+ * Handles form validation, submission, and cancellation.
+ * 
+ * @param {MusicianFormProps} props - Component props
+ * @returns {JSX.Element} Rendered form component
+ */
+export const MusicianForm: React.FC<MusicianFormProps> = ({
+  initialValues,
+  onSubmit,
+  onCancel,
+}) => {
+  // Initialize form with default values or provided initial values
+  const defaultValues = {
+    name: '',
+    instrument: '',
+    email: '',
+    phone: '',
+    experience: '',
+    availability: '',
+    notes: '',
+    status: 'active' as const,
+    ...initialValues,
+  };
 
-export function MusicianForm({ initialValues = defaultValues, onSubmit, onCancel }: MusicianFormProps): JSX.Element {
+  // Use custom form validation hook
   const {
     values,
     errors,
@@ -67,98 +86,104 @@ export function MusicianForm({ initialValues = defaultValues, onSubmit, onCancel
     handleBlur,
     validateForm,
     resetForm,
-  } = useFormValidation(initialValues, validationRules);
+  } = useFormValidation(defaultValues, validationRules);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /**
+   * Handles form submission
+   * @param {React.FormEvent} e - Form submission event
+   */
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(values);
+      onSubmit(values as unknown as Musician);
+      if (!initialValues) {
+        resetForm();
+      }
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <FormInput
-            label="Name"
-            name="name"
-            type="text"
-            value={values.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={errors.name}
-            touched={touched.name}
-            required
-          />
-        </div>
+    <form onSubmit={handleFormSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+        {/* Name input field */}
+        <FormInput
+          label="Name"
+          name="name"
+          type="text"
+          value={values.name}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.name}
+          touched={touched.name}
+          required
+        />
 
-        <div className="sm:col-span-2">
-          <FormInput
-            label="Instrument"
-            name="instrument"
-            type="text"
-            value={values.instrument}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={errors.instrument}
-            touched={touched.instrument}
-            required
-          />
-        </div>
+        {/* Instrument input field */}
+        <FormInput
+          label="Instrument"
+          name="instrument"
+          type="text"
+          value={values.instrument}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.instrument}
+          touched={touched.instrument}
+          required
+        />
 
-        <div className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-4">
-          <FormInput
-            label="Email"
-            name="email"
-            type="email"
-            value={values.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={errors.email}
-            touched={touched.email}
-            required
-          />
+        {/* Email input field */}
+        <FormInput
+          label="Email"
+          name="email"
+          type="email"
+          value={values.email}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.email}
+          touched={touched.email}
+          required
+        />
 
-          <FormInput
-            label="Phone"
-            name="phone"
-            type="tel"
-            value={values.phone}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={errors.phone}
-            touched={touched.phone}
-            required
-          />
-        </div>
+        {/* Phone input field */}
+        <FormInput
+          label="Phone"
+          name="phone"
+          type="tel"
+          value={values.phone}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.phone}
+          touched={touched.phone}
+          required
+        />
 
-        <div className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-4">
-          <FormInput
-            label="Experience"
-            name="experience"
-            type="text"
-            value={values.experience}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={errors.experience}
-            touched={touched.experience}
-            required
-          />
+        {/* Experience input field */}
+        <FormInput
+          label="Experience"
+          name="experience"
+          type="text"
+          value={values.experience}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.experience}
+          touched={touched.experience}
+          required
+        />
 
-          <FormInput
-            label="Availability"
-            name="availability"
-            type="text"
-            value={values.availability}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={errors.availability}
-            touched={touched.availability}
-            required
-          />
-        </div>
+        {/* Availability input field */}
+        <FormInput
+          label="Availability"
+          name="availability"
+          type="text"
+          value={values.availability}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.availability}
+          touched={touched.availability}
+          required
+        />
 
+        {/* Notes textarea field */}
         <div className="sm:col-span-2">
           <FormInput
             label="Notes"
@@ -172,6 +197,7 @@ export function MusicianForm({ initialValues = defaultValues, onSubmit, onCancel
           />
         </div>
 
+        {/* Status select field */}
         <div className="sm:col-span-2">
           <label htmlFor="status" className="block text-sm font-medium text-gray-700">
             Status
@@ -194,21 +220,22 @@ export function MusicianForm({ initialValues = defaultValues, onSubmit, onCancel
         </div>
       </div>
 
+      {/* Form action buttons */}
       <div className="flex justify-end space-x-3">
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          {initialValues ? 'Update' : 'Add'} Musician
+          {initialValues ? 'Update Musician' : 'Add Musician'}
         </button>
       </div>
     </form>
   );
-} 
+}; 

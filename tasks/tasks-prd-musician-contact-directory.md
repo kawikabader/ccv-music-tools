@@ -79,12 +79,12 @@
 
 ## 5.0 Testing and Documentation
 
-* [ ] 5.1 Write unit tests for components
-* [ ] 5.2 Add integration tests
-* [ ] 5.3 Create end-to-end tests
-* [ ] 5.4 Update documentation
-* [ ] 5.5 Add code comments
-* [ ] 5.6 Create user guide
+* [x] 5.1 Write unit tests for components
+* [x] 5.2 Add integration tests
+* [x] 5.3 Create end-to-end tests
+* [x] 5.4 Update documentation
+* [x] 5.5 Add code comments
+* [x] 5.6 Create user guide
 
 ## 6.0 Deployment and Maintenance
 
