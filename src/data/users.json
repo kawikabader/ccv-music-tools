@@ -1,31 +1,17 @@
 {
   "users": [
     {
-      "id": "1",
-      "name": "John Doe",
-      "username": "johndoe",
-      "password": "admin123",
-      "role": "director"
-    },
-    {
-      "id": "2",
-      "name": "Sarah Smith",
-      "username": "sarahs",
-      "password": "admin123",
-      "role": "director"
-    },
-    {
-      "id": "3",
-      "name": "Admin User",
-      "username": "admin",
-      "password": "admin123",
+      "id": "5",
+      "name": "Kawika Bader",
+      "username": "kawikabader",
+      "password": "kawikabader#5289",
       "role": "admin"
     },
     {
       "id": "4",
-      "name": "Test Director",
+      "name": "Music Director Name",
       "username": "testdirector",
-      "password": "director123",
+      "password": "testdirector#0123",
       "role": "director"
     }
   ]

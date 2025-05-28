@@ -37,6 +37,18 @@
 * Use `npm run build` to create production build
 * Use `npm run deploy` to deploy to GitHub Pages
 
+### Password Generation Pattern
+
+For security and consistency, user passwords follow this pattern:
+* Format: `{username}#{last4_phone}`
+* Example: For a user with username "johndoe" and phone "(480) 555-1234", the password would be `johndoe#1234`
+
+This pattern ensures:
+* Passwords are unique to each user
+* Contains letters, numbers, and a special character
+* Easy to remember (based on known information)
+* Minimum 8 characters in length
+
 ## Tasks
 
 # Musician Contact Directory - Task List
