@@ -1,72 +1,74 @@
 # Team Roster
 
-A minimal, mobile-optimized web app for music directors and admins to manage and search musician contact info. Built with React, TypeScript, Tailwind CSS, and deployed on GitHub Pages.
+A web application for music directors to manage musician contact information.
 
 ## Features
 
-* Secure login for music directors and admins
-* Search and filter musicians by name or instrument
-* Admin CSV import/export and musician management
-* Mobile-first, fast, and minimal UI
+* Simple email/password authentication
+* Protected routes
+* Responsive design with Tailwind CSS
+* TypeScript support
 
-## Tech Stack
+## Prerequisites
 
-* React + TypeScript
-* Tailwind CSS
-* Vite
-* Jest + React Testing Library
-* GitHub Pages (gh-pages)
+* Node.js 16+
+* npm 7+
 
-## Getting Started
+## Setup
 
-### 1. Install dependencies
+1. Clone the repository:
+   
 
 ```bash
-npm install
-```
+   git clone https://github.com/yourusername/team-roster.git
+   cd team-roster
+   ```
 
-### 2. Start the dev server
-
-```bash
-npm run dev
-```
-
-### 3. Lint and format code
+2. Install dependencies:
+   
 
 ```bash
-npm run lint
-npm run format
-```
+   npm install
+   ```
 
-### 4. Run tests
-
-```bash
-npm test
-```
-
-### 5. Build for production
+3. Start the development server:
+   
 
 ```bash
-npm run build
-```
+   npm run dev
+   ```
 
-### 6. Deploy to GitHub Pages
+4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## Development
+
+* `npm run dev` - Start development server
+* `npm run build` - Build for production
+* `npm run preview` - Preview production build
+* `npm run test` - Run tests
+* `npm run lint` - Run linter
+* `npm run format` - Format code with Prettier
+
+## Deployment
+
+The application is configured for deployment on GitHub Pages. To deploy:
+
+1. Update the `homepage` field in `package.json` with your GitHub Pages URL
+2. Run:
+   
 
 ```bash
-npm run deploy
-```
+   npm run deploy
+   ```
+
+## License
+
+MIT
 
 ## Project Structure
 
 * `src/components/` — React components (Auth, MusicianList, Admin)
-* `src/data/` — JSON data files for musicians and users
-* `src/utils/` — Utility functions (auth, CSV)
-* `src/types/` — Shared TypeScript types
-
-## Contributing
-
-PRs and issues welcome! Please follow the code style enforced by ESLint and Prettier.
-
----
-
-© CCV Team Roster
+* `src/pages/` — Page components
+* `src/utils/` — Utility functions
+* `src/types/` — TypeScript type definitions
+* `src/data/` — JSON data files

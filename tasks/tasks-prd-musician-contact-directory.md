@@ -33,14 +33,14 @@
 
 ## Tasks
 
-* [ ] 1.0 Project Setup and Configuration
+* [x] 1.0 Project Setup and Configuration
   + [x] 1.1 Initialize React project with TypeScript
   + [x] 1.2 Set up Tailwind CSS
   + [x] 1.3 Configure GitHub Pages deployment
   + [x] 1.4 Set up testing environment (Jest + React Testing Library)
   + [x] 1.5 Create initial project structure and file organization
-  + [ ] 1.6 Set up ESLint and Prettier
-  + [ ] 1.7 Create basic README.md with setup instructions
+  + [x] 1.6 Set up ESLint and Prettier
+  + [x] 1.7 Create basic README.md with setup instructions
 
 * [ ] 2.0 Authentication System Implementation
   + [ ] 2.1 Set up GitHub OAuth integration

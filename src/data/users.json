@@ -1,1 +1,18 @@
-[]
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "John Smith",
+      "email": "john@example.com",
+      "password": "hashed_password_here",
+      "role": "director"
+    },
+    {
+      "id": "2",
+      "name": "Sarah Johnson",
+      "email": "sarah@example.com",
+      "password": "hashed_password_here",
+      "role": "director"
+    }
+  ]
+}
