@@ -1,14 +1,21 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './utils/auth';
+import { NotificationProvider } from './context/NotificationContext';
+import { Layout } from './components/Layout/Layout';
 import { Login } from './components/Auth/Login';
 import { Unauthorized } from './components/Auth/Unauthorized';
-import { PrivateRoute } from './components/Auth/PrivateRoute';
-import { Layout } from './components/Layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Musicians } from './pages/Musicians';
+import { Notification } from './components/Common/Notification';
+import { useAuth } from './utils/auth';
 
-function AppRoutes() {
+function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element {
+  const { user } = useAuth();
+  return user ? <>{children}</> : <Navigate to="/login" />;
+}
+
+function AppRoutes(): JSX.Element {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -16,33 +23,28 @@ function AppRoutes() {
       <Route
         path="/"
         element={
-          <PrivateRoute requiredRole="director">
+          <PrivateRoute>
             <Layout>
-              <Dashboard />
+              <Routes>
+                <Route index element={<Dashboard />} />
+                <Route path="musicians" element={<Musicians />} />
+              </Routes>
             </Layout>
           </PrivateRoute>
         }
       />
-      <Route
-        path="/musicians"
-        element={
-          <PrivateRoute requiredRole="director">
-            <Layout>
-              <Musicians />
-            </Layout>
-          </PrivateRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
-export function App() {
+export function App(): JSX.Element {
   return (
     <Router>
       <AuthProvider>
-        <AppRoutes />
+        <NotificationProvider>
+          <Notification />
+          <AppRoutes />
+        </NotificationProvider>
       </AuthProvider>
     </Router>
   );

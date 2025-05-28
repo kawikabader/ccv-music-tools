@@ -1,1 +1,92 @@
-[]
+{
+  "musicians": [
+    {
+      "id": "1",
+      "name": "Sarah Chen",
+      "instrument": "Violin",
+      "email": "sarah.chen@example.com",
+      "phone": "(555) 123-4567",
+      "experience": "15 years",
+      "availability": "Weekends",
+      "notes": "Principal violinist, available for weddings and corporate events",
+      "status": "active"
+    },
+    {
+      "id": "2",
+      "name": "Michael Rodriguez",
+      "instrument": "Cello",
+      "email": "michael.r@example.com",
+      "phone": "(555) 234-5678",
+      "experience": "12 years",
+      "availability": "Weekdays",
+      "notes": "Specializes in classical and contemporary pieces",
+      "status": "active"
+    },
+    {
+      "id": "3",
+      "name": "Emma Thompson",
+      "instrument": "Flute",
+      "email": "emma.t@example.com",
+      "phone": "(555) 345-6789",
+      "experience": "8 years",
+      "availability": "Flexible",
+      "notes": "Also plays piccolo, available for chamber music",
+      "status": "active"
+    },
+    {
+      "id": "4",
+      "name": "James Wilson",
+      "instrument": "Trumpet",
+      "email": "james.w@example.com",
+      "phone": "(555) 456-7890",
+      "experience": "10 years",
+      "availability": "Evenings",
+      "notes": "Jazz and classical repertoire",
+      "status": "active"
+    },
+    {
+      "id": "5",
+      "name": "Olivia Kim",
+      "instrument": "Piano",
+      "email": "olivia.k@example.com",
+      "phone": "(555) 567-8901",
+      "experience": "20 years",
+      "availability": "Weekends",
+      "notes": "Accompanist and solo performer",
+      "status": "active"
+    },
+    {
+      "id": "6",
+      "name": "David Patel",
+      "instrument": "Clarinet",
+      "email": "david.p@example.com",
+      "phone": "(555) 678-9012",
+      "experience": "7 years",
+      "availability": "Weekdays",
+      "notes": "Orchestral and chamber music specialist",
+      "status": "inactive"
+    },
+    {
+      "id": "7",
+      "name": "Sophia Martinez",
+      "instrument": "Viola",
+      "email": "sophia.m@example.com",
+      "phone": "(555) 789-0123",
+      "experience": "9 years",
+      "availability": "Flexible",
+      "notes": "String quartet experience",
+      "status": "active"
+    },
+    {
+      "id": "8",
+      "name": "Lucas Anderson",
+      "instrument": "Percussion",
+      "email": "lucas.a@example.com",
+      "phone": "(555) 890-1234",
+      "experience": "11 years",
+      "availability": "Weekends",
+      "notes": "Orchestral and contemporary percussion",
+      "status": "active"
+    }
+  ]
+}
