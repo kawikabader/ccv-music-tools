@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "homepage": "https://yourusername.github.io/team-roster",
+  "homepage": "https://kawikabader.github.io/team-roster",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
