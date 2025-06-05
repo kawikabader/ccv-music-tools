@@ -1,75 +1,76 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from '../lib/supabase';
+import type { User } from '../types/supabase';
 import type { ReactNode } from 'react';
-import type { User, AuthContextType, UserRole } from '../types/index.js';
-import userData from '../data/users.json';
 
-const { users } = userData;
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => void;
+  isAuthenticated: boolean;
+}
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Check for stored user data on mount
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (username: string, password: string) => {
+  const login = useCallback(async (username: string, password: string) => {
+    setLoading(true);
+    setError(null);
     try {
-      setIsLoading(true);
-      setError(null);
+      const { data, error } = await supabase
+        .from('users')
+        .select()
+        .eq('username', username)
+        .eq('password', password)
+        .single();
 
-      // Find user in JSON data
-      const foundUser = users.find(
-        (u) => u.username === username && u.password === password
-      );
+      if (error) throw error;
+      if (!data) throw new Error('Invalid credentials');
 
-      if (!foundUser) {
-        throw new Error('Invalid username or password');
-      }
-
-      // Create user object without password
-      const user: User = {
-        id: foundUser.id,
-        name: foundUser.name,
-        username: foundUser.username,
-        role: foundUser.role as UserRole,
-      };
-
-      // Store user in localStorage
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      setUser(data);
+      localStorage.setItem('auth_user', JSON.stringify(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('user');
-    setUser(null);
   }, []);
 
-  const value: AuthContextType = {
+  const logout = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem('auth_user');
+  }, []);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('auth_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (err) {
+        console.error('Failed to restore auth state:', err);
+        localStorage.removeItem('auth_user');
+      }
+    }
+  }, []);
+
+  const value = {
     user,
-    isAuthenticated: !!user,
-    isLoading,
+    loading,
     error,
     login,
     logout,
+    isAuthenticated: !!user
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -84,25 +85,25 @@ export function useAuth() {
 }
 
 export function useRequireAuth() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       window.location.href = '/login';
     }
-  }, [isLoading, isAuthenticated]);
+  }, [loading, isAuthenticated]);
 
   return useAuth();
 }
 
-export function useRequireRole(role: UserRole) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+export function useRequireRole(role: 'admin' | 'director') {
+  const { user, isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || user?.role !== role)) {
+    if (!loading && (!isAuthenticated || user?.role !== role)) {
       window.location.href = '/unauthorized';
     }
-  }, [isLoading, isAuthenticated, user, role]);
+  }, [loading, isAuthenticated, user, role]);
 
   return useAuth();
 } 

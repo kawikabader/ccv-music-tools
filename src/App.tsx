@@ -6,6 +6,8 @@ import { Layout } from './components/Layout/Layout';
 import { Login } from './components/Auth/Login';
 import { Musicians } from './pages/Musicians';
 import { useAuth } from './utils/auth';
+import { MusicianList } from './components/MusicianList/MusicianList';
+import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 
 function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element {
   const { user } = useAuth();
@@ -13,20 +15,33 @@ function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element 
 }
 
 export function App(): JSX.Element {
+  // Use basename only in production
+  const basename = import.meta.env.PROD ? '/team-roster' : '';
+
   return (
-    <Router>
+    <Router basename={basename}>
       <AuthProvider>
         <NotificationProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
-              path="/"
+              path="/musicians"
               element={
-                <PrivateRoute>
-                  <Layout>
-                    <Musicians />
-                  </Layout>
-                </PrivateRoute>
+                <ProtectedRoute>
+                  <MusicianList />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/musicians" replace />} />
+            <Route
+              path="/unauthorized"
+              element={
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">Unauthorized</h1>
+                    <p className="text-gray-600">You don't have permission to access this page.</p>
+                  </div>
+                </div>
               }
             />
           </Routes>

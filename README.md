@@ -45,7 +45,42 @@ A React-based web application for managing musician contacts, built with TypeScr
    npm install
    ```
 
-3. Start the development server:
+3. Set up Supabase:
+   - Create a free account at [Supabase](https://supabase.com)
+   - Create a new project
+   - Get your project URL and anon key from Project Settings > API
+   - Create a `.env` file in the root directory with:
+
+     
+
+```
+     VITE_SUPABASE_URL=your_supabase_project_url
+     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+     ```
+
+4. Set up your database tables:
+   
+
+```sql
+   -- Users table
+   create table users (
+     id uuid default uuid_generate_v4() primary key,
+     name text not null,
+     username text unique not null,
+     password text not null,
+     role text not null check (role in ('admin', 'director'))
+   );
+
+   -- Musicians table
+   create table musicians (
+     id uuid default uuid_generate_v4() primary key,
+     name text not null,
+     instrument text,
+     phone text
+   );
+   ```
+
+5. Start the development server:
    
 
 ```bash

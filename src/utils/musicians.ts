@@ -1,25 +1,45 @@
-import { v4 as uuidv4 } from 'uuid';
-import type { Musician } from '../types';
-import musicianData from '../data/musicians.json';
+import { supabase } from '../lib/supabase';
+import type { Musician } from '../types/supabase';
 
-let musicians = [...musicianData.musicians];
+export async function getMusicians() {
+  const { data, error } = await supabase.from('musicians').select('*').order('name');
 
-export const addMusician = (newMusician: { name: string; phone: string }): Musician => {
-  const musician: Musician = {
-    id: uuidv4(),
-    name: newMusician.name,
-    instrument: '',
-    phone: newMusician.phone,
-  };
+  if (error) throw error;
+  return data || [];
+}
 
-  musicians.push(musician);
-  return musician;
-};
+export async function addMusician(musician: Omit<Musician, 'id'>) {
+  const { data, error } = await supabase.from('musicians').insert(musician).select().single();
 
-export const getMusicians = (): Musician[] => {
-  return musicians;
-};
+  if (error) throw error;
+  return data;
+}
 
-export const updateMusicians = (updatedMusicians: Musician[]): void => {
-  musicians = updatedMusicians;
-};
+export async function updateMusician(id: string, updates: Partial<Omit<Musician, 'id'>>) {
+  const { data, error } = await supabase
+    .from('musicians')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteMusician(id: string) {
+  const { error } = await supabase.from('musicians').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function searchMusicians(query: string) {
+  const { data, error } = await supabase
+    .from('musicians')
+    .select('*')
+    .ilike('name', `%${query}%`)
+    .order('name');
+
+  if (error) throw error;
+  return data || [];
+}
