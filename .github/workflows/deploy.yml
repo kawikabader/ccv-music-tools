@@ -3,6 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  workflow_dispatch: # Allow manual triggers
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -22,9 +23,12 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch full history for better caching
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -32,14 +36,56 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            .cache
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Validate Environment Variables
+        run: |
+          if [ -z "${{ secrets.VITE_SUPABASE_URL }}" ]; then
+            echo "❌ VITE_SUPABASE_URL is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "❌ VITE_SUPABASE_ANON_KEY is not set"
+            exit 1
+          fi
+          echo "✅ Environment variables validated"
+
+      - name: Run Tests
+        run: npm test -- --coverage --watchAll=false
+        continue-on-error: true
 
       - name: Build
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          NODE_ENV: production
+
+      - name: Validate Build Output
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Build output directory 'dist' not found"
+            exit 1
+          fi
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ index.html not found in build output"
+            exit 1
+          fi
+          echo "✅ Build output validated"
+          echo "📊 Build size:"
+          du -sh dist/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -52,3 +98,25 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Post-deployment Health Check
+        run: |
+          echo "🚀 Deployment completed!"
+          echo "📍 Site URL: ${{ steps.deployment.outputs.page_url }}"
+
+          # Wait a moment for deployment to propagate
+          sleep 30
+
+          # Basic health check
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.deployment.outputs.page_url }}" || echo "000")
+          if [ "$response" = "200" ]; then
+            echo "✅ Health check passed (HTTP $response)"
+          else
+            echo "⚠️ Health check returned HTTP $response"
+          fi
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Please check the logs above for details."
