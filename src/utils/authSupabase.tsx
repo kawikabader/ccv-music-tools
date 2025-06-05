@@ -9,6 +9,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   error: string | null;
+  connectionError: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -22,76 +23,144 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState(false);
 
-  // Load user profile data
+  // Load user profile data with timeout
   const loadProfile = async (userId: string) => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
+        .abortSignal(controller.signal)
         .single();
+
+      clearTimeout(timeoutId);
 
       if (error) throw error;
       setProfile(data);
-    } catch (err) {
-      console.error('Error loading profile:', err);
+    } catch (err: unknown) {
+      if (import.meta.env.DEV) {
+        console.error('Error loading profile:', err);
+      }
       setProfile(null);
+      // Don't set error for profile loading failures - continue with limited functionality
     }
   };
 
   // Handle auth state changes
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const user: User = {
-          id: session.user.id,
-          email: session.user.email!,
-        };
-        setUser(user);
-        loadProfile(session.user.id);
+    let mounted = true;
+    const initTimeout = setTimeout(() => {
+      if (mounted) {
+        setLoading(false);
+        setConnectionError(true);
+        // Don't set a blocking error - just mark connection as problematic
       }
-      setLoading(false);
-    });
+    }, 15000); // 15 second timeout for initial auth check
+
+    // Get initial session with timeout
+    const initAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) throw error;
+
+        if (mounted) {
+          if (session?.user) {
+            const user: User = {
+              id: session.user.id,
+              email: session.user.email!,
+            };
+            setUser(user);
+            await loadProfile(session.user.id);
+          }
+          clearTimeout(initTimeout);
+          setLoading(false);
+          setConnectionError(false);
+        }
+      } catch (err) {
+        if (mounted) {
+          if (import.meta.env.DEV) {
+            console.error('Auth initialization error:', err);
+          }
+          clearTimeout(initTimeout);
+          setLoading(false);
+          setConnectionError(true);
+          // Don't block the app - just mark connection issues
+        }
+      }
+    };
+
+    initAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const user: User = {
-          id: session.user.id,
-          email: session.user.email!,
-        };
-        setUser(user);
-        await loadProfile(session.user.id);
-      } else {
-        setUser(null);
-        setProfile(null);
+      if (!mounted) return;
+
+      try {
+        if (session?.user) {
+          const user: User = {
+            id: session.user.id,
+            email: session.user.email!,
+          };
+          setUser(user);
+          await loadProfile(session.user.id);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
+        setLoading(false);
+        setError(null); // Clear any connection errors on successful auth change
+        setConnectionError(false);
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.error('Auth state change error:', err);
+        }
+        setLoading(false);
+        setConnectionError(true);
       }
-      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      clearTimeout(initTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
       setError(null);
+      setConnectionError(false);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      clearTimeout(timeoutId);
+
       if (error) throw error;
 
       // User and profile will be set by the auth state change listener
     } catch (err) {
       const authError = err as AuthError;
-      setError(authError.message || 'An error occurred during sign in');
+      if (authError.name === 'AbortError') {
+        setError('Sign in timed out. Please check your connection and try again.');
+        setConnectionError(true);
+      } else {
+        setError(authError.message || 'An error occurred during sign in');
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -102,6 +171,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError(null);
+      setConnectionError(false);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -113,6 +186,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
 
+      clearTimeout(timeoutId);
+
       if (error) throw error;
 
       // Check if user needs to confirm email
@@ -121,7 +196,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       const authError = err as AuthError;
-      setError(authError.message || 'An error occurred during sign up');
+      if (authError.name === 'AbortError') {
+        setError('Sign up timed out. Please check your connection and try again.');
+        setConnectionError(true);
+      } else {
+        setError(authError.message || 'An error occurred during sign up');
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -147,13 +227,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clearError = () => setError(null);
+  const clearError = () => {
+    setError(null);
+    setConnectionError(false);
+  };
 
   const value = {
     user,
     profile,
     loading,
     error,
+    connectionError,
     signIn,
     signUp,
     signOut,

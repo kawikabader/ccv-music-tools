@@ -8,6 +8,7 @@ import { Musicians } from './pages/Musicians';
 import { useAuth } from './utils/authSupabase';
 import { MusicianList } from './components/MusicianList/MusicianList';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
+import { OfflineDetector } from './components/Common/OfflineDetector';
 
 function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ export function App(): JSX.Element {
     <Router basename={basename}>
       <AuthProvider>
         <NotificationProvider>
+          <OfflineDetector />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
