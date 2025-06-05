@@ -94,7 +94,14 @@ export function MusicianList() {
       {/* Sticky Header - Fixed height */}
       <div className="sticky top-0 z-50 bg-white shadow-md h-16">
         <div className="container mx-auto px-4 h-full flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Team Roster</h1>
+          <div className="flex items-center space-x-3">
+            <img
+              src="/logo-header.png"
+              alt="Team Roster Logo"
+              className="h-10 w-10"
+            />
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Team Roster</h1>
+          </div>
 
           {/* Profile Menu */}
           <div className="relative">
