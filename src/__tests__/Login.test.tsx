@@ -2,15 +2,16 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
 import { Login } from '../components/Auth/Login';
 import { AuthProvider } from '../utils/authSupabase';
 
 // Mock Supabase
-const mockSignIn = jest.fn();
-const mockClearError = jest.fn();
+const mockSignIn = vi.fn();
+const mockClearError = vi.fn();
 
-jest.mock('../utils/authSupabase', () => ({
-  ...jest.requireActual('../utils/authSupabase'),
+vi.mock('../utils/authSupabase', () => ({
+  ...vi.importActual('../utils/authSupabase'),
   useAuth: () => ({
     signIn: mockSignIn,
     loading: false,
@@ -21,9 +22,9 @@ jest.mock('../utils/authSupabase', () => ({
 }));
 
 // Mock react-router-dom
-const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
   useNavigate: () => mockNavigate,
 }));
 
@@ -37,7 +38,7 @@ const LoginWrapper = () => (
 
 describe('Login', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders login form', () => {
@@ -91,8 +92,8 @@ describe('Login', () => {
 
   it('shows loading state during sign in', () => {
     // Mock loading state
-    jest.doMock('../utils/authSupabase', () => ({
-      ...jest.requireActual('../utils/authSupabase'),
+    vi.doMock('../utils/authSupabase', () => ({
+      ...vi.importActual('../utils/authSupabase'),
       useAuth: () => ({
         signIn: mockSignIn,
         loading: true,
@@ -110,8 +111,8 @@ describe('Login', () => {
 
   it('displays error message when auth fails', () => {
     // Mock error state
-    jest.doMock('../utils/authSupabase', () => ({
-      ...jest.requireActual('../utils/authSupabase'),
+    vi.doMock('../utils/authSupabase', () => ({
+      ...vi.importActual('../utils/authSupabase'),
       useAuth: () => ({
         signIn: mockSignIn,
         loading: false,
