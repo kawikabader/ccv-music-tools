@@ -1,12 +1,9 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta charset="utf-8">
   <title>Team Roster</title>
-  <!-- Start Single Page Apps for GitHub Pages -->
   <script type="text/javascript">
     // Single Page Apps for GitHub Pages
     // MIT License
@@ -29,12 +26,22 @@
       }
     }(window.location))
   </script>
-  <!-- End Single Page Apps for GitHub Pages -->
 </head>
 
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
+  <!-- This is a redirect page for GitHub Pages -->
+  <script type="text/javascript">
+    // Immediately redirect to the main page
+    var segmentCount = 1; // Change this to the number of path segments in your repository name
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
+      l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
 </body>
 
 </html>
