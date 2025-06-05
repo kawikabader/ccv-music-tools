@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Musician } from '../types';
-import { useAuth } from '../utils/auth';
+import { useAuth, useIsAdmin } from '../utils/authSupabase';
 import { getMusicians, addMusician } from '../utils/musicians';
 
 export function Musicians(): JSX.Element {
@@ -9,8 +9,8 @@ export function Musicians(): JSX.Element {
   const [musicians, setMusicians] = useState<Musician[]>([]);
   const [phoneInput, setPhoneInput] = useState('');
   const [nameInput, setNameInput] = useState('');
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const { user, profile } = useAuth();
+  const isAdmin = useIsAdmin();
 
   useEffect(() => {
     setMusicians(getMusicians());

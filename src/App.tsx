@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './utils/auth';
+import { AuthProvider } from './utils/authSupabase';
 import { NotificationProvider } from './context/NotificationContext';
 import { Layout } from './components/Layout/Layout';
 import { Login } from './components/Auth/Login';
 import { Musicians } from './pages/Musicians';
-import { useAuth } from './utils/auth';
+import { useAuth } from './utils/authSupabase';
 import { MusicianList } from './components/MusicianList/MusicianList';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 

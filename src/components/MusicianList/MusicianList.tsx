@@ -113,11 +113,11 @@ export function MusicianList() {
             >
               {/* User Avatar */}
               <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                {getUserInitials(user?.name || 'U')}
+                {getUserInitials(profile?.name || 'U')}
               </div>
               {/* Name (hidden on mobile) */}
               <span className="hidden sm:block text-gray-700 font-medium max-w-32 truncate">
-                {user?.name}
+                {profile?.name}
               </span>
               {/* Dropdown arrow */}
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,8 +129,8 @@ export function MusicianList() {
             {showProfileMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
                 <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                  <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
+                  <p className="text-sm font-medium text-gray-900">{profile?.name}</p>
+                  <p className="text-sm text-gray-500 capitalize">{profile?.role}</p>
                 </div>
                 <button
                   onClick={handleLogout}
@@ -168,7 +168,7 @@ export function MusicianList() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Add Musician Form - Only for Admin */}
-        {user?.role === 'admin' && (
+        {isAdmin && (
           <form onSubmit={handleAddMusician} className="mb-8 space-y-4 bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Add New Musician</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -280,7 +280,7 @@ export function MusicianList() {
                         )}
                       </p>
                     </div>
-                    {user?.role === 'admin' && (
+                    {isAdmin && (
                       <div className="flex space-x-2 ml-4">
                         <button
                           onClick={() => setEditingMusician(musician)}
