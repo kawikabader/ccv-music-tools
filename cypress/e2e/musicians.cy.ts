@@ -1,6 +1,6 @@
 describe('Musician Management', () => {
   beforeEach(() => {
-    cy.login('admin@example.com', 'password123');
+    cy.login('admin@example.com', 'testpass');
     cy.visit('/musicians');
   });
 

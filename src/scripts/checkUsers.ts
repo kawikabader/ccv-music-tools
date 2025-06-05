@@ -19,27 +19,10 @@ async function checkUsers() {
     console.log('📋 User data:', data);
 
     if (!data || data.length === 0) {
-      console.log('⚠️  No users found! Creating a test user...');
-
-      const { data: newUser, error: insertError } = await supabase
-        .from('users')
-        .insert([
-          {
-            name: 'Admin User',
-            username: 'admin',
-            password: 'admin123',
-            role: 'admin',
-          },
-        ])
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error('❌ Error creating user:', insertError.message);
-      } else {
-        console.log('✅ Created test user:', newUser);
-        console.log('📝 Login with: username="admin", password="admin123"');
-      }
+      console.log(
+        '⚠️  No users found! Please create users through your Supabase dashboard or admin interface.'
+      );
+      console.log('💡 Tip: Use the SQL editor in Supabase to create initial users.');
     }
   } catch (err) {
     console.error('❌ Script error:', err);

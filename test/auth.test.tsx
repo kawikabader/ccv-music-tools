@@ -54,7 +54,7 @@ const TestComponent = () => {
       <div data-testid="is-loading">{isLoading.toString()}</div>
       <div data-testid="error">{error}</div>
       <div data-testid="user">{user ? JSON.stringify(user) : 'null'}</div>
-      <button onClick={() => login('test@example.com', 'password')}>Login</button>
+      <button onClick={() => login('test@example.com', 'testpass')}>Login</button>
       <button onClick={logout}>Logout</button>
     </div>
   );

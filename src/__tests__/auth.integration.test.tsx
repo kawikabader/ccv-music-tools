@@ -60,7 +60,7 @@ describe('Authentication Integration', () => {
 
     // Fill in login form
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.type(screen.getByLabelText(/password/i), 'testpass');
 
     // Submit form
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
@@ -91,7 +91,7 @@ describe('Authentication Integration', () => {
     // First login
     renderWithAuth(<Login />);
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.type(screen.getByLabelText(/password/i), 'testpass');
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     // Wait for dashboard to appear
@@ -116,7 +116,7 @@ describe('Authentication Integration', () => {
     // First login
     renderWithAuth(<Login />);
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.type(screen.getByLabelText(/password/i), 'testpass');
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     // Wait for dashboard to appear

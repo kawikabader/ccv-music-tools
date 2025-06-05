@@ -41,11 +41,11 @@ describe('Login', () => {
     renderLogin();
 
     await userEvent.type(screen.getByPlaceholderText(/email address/i), 'test@example.com');
-    await userEvent.type(screen.getByPlaceholderText(/password/i), 'password123');
+    await userEvent.type(screen.getByPlaceholderText(/password/i), 'testpass');
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
+      expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'testpass');
     });
   });
 

@@ -141,13 +141,7 @@ src/
 
 ## Authentication
 
-The application uses Supabase authentication. For testing purposes, the following test credentials can be used if you set up your own Supabase instance:
-
-* Username: kawikabader (Admin role)
-* Password: kawikabader#5289
-
-* Username: testdirector (Director role)  
-* Password: testdirector#0123
+The application uses Supabase authentication.
 
 ## Contributing
 
