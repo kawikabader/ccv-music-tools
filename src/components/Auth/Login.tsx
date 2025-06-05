@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/auth';
+import logoUrl from '../../assets/a.png';
 
 export function Login() {
   const [username, setUsername] = useState('');
@@ -23,7 +24,7 @@ export function Login() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <img
-            src="/a.png"
+            src={logoUrl}
             alt="Team Roster Logo"
             className="mx-auto h-32 w-32 mb-6"
           />

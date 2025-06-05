@@ -3,6 +3,7 @@ import { useMusicians } from '../../hooks/useMusicians';
 import { useAuth } from '../../utils/auth';
 import { useNotification } from '../../context/NotificationContext';
 import type { Musician } from '../../types/supabase';
+import logoUrl from '../../assets/a.png';
 
 export function MusicianList() {
   const { musicians, loading, error, addMusician, updateMusician, deleteMusician } = useMusicians();
@@ -96,7 +97,7 @@ export function MusicianList() {
         <div className="container mx-auto px-4 h-full flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <img
-              src="/a.png"
+              src={logoUrl}
               alt="Team Roster Logo"
               className="h-10 w-10"
             />
