@@ -10,20 +10,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-// Test connection function
-export const testConnection = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('musicians')
-      .select('count', { count: 'exact', head: true });
-    if (error) {
-      console.error('Supabase connection error:', error);
-      return false;
+// Test connection on initialization (development only)
+if (import.meta.env.DEV) {
+  (async () => {
+    try {
+      const { error } = await supabase
+        .from('musicians')
+        .select('count', { count: 'exact', head: true });
+
+      if (error) {
+        console.error('Supabase connection error:', error);
+      } else {
+        console.log('Supabase connection successful');
+      }
+    } catch (err: unknown) {
+      console.error('Supabase connection failed:', err);
     }
-    console.log('Supabase connection successful');
-    return true;
-  } catch (err) {
-    console.error('Supabase connection failed:', err);
-    return false;
-  }
-};
+  })();
+}

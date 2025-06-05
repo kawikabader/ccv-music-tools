@@ -14,8 +14,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   process.exit(1);
 }
 
-console.log('Supabase URL:', supabaseUrl);
-console.log('Anon Key length:', supabaseAnonKey.length);
+// Log connection info without exposing sensitive data
+console.log('Supabase configuration loaded successfully');
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
