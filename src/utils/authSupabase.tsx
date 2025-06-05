@@ -210,20 +210,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      setLoading(true);
       setError(null);
+      setConnectionError(false);
 
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
-      setUser(null);
-      setProfile(null);
+      // Don't manually set user/profile to null here - let the auth state change listener handle it
+      // This prevents race conditions between manual state updates and Supabase's auth state changes
     } catch (err) {
       const authError = err as AuthError;
       setError(authError.message || 'An error occurred during sign out');
+      setLoading(false); // Only set loading to false on error
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
