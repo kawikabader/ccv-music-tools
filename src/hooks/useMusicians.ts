@@ -29,14 +29,23 @@ export function useMusicians() {
 
   async function fetchMusicians() {
     try {
+      console.log('🔄 Fetching musicians...');
+
       const { data, error } = await supabase.from('musicians').select('*').order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
 
+      console.log('✅ Musicians loaded:', data?.length || 0);
       setMusicians(data);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('❌ Fetch error:', err);
+      const errorMessage =
+        err instanceof Error ? err.message : 'An error occurred loading musicians';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
