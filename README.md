@@ -34,7 +34,7 @@ A React-based web application for managing musician contacts, built with TypeScr
    
 
 ```bash
-   git clone https://github.com/yourusername/team-roster.git
+   git clone https://github.com/kawikabader/team-roster.git
    cd team-roster
    ```
 
@@ -141,10 +141,13 @@ src/
 
 ## Authentication
 
-The application uses a simple authentication system with the following credentials:
+The application uses Supabase authentication. For testing purposes, the following test credentials can be used if you set up your own Supabase instance:
 
-* Email: admin@example.com
-* Password: password123
+* Username: kawikabader (Admin role)
+* Password: kawikabader#5289
+
+* Username: testdirector (Director role)  
+* Password: testdirector#0123
 
 ## Contributing
 
