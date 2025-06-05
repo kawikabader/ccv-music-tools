@@ -91,17 +91,21 @@ export function useFormValidation(
 
   const validateForm = useCallback(() => {
     const newErrors: FormErrors = {};
+    const newTouched: FormTouched = {};
     let isValid = true;
 
     Object.keys(validationRules).forEach(name => {
       const error = validateField(name, values[name]);
+      newTouched[name] = true; // Mark all fields as touched during form validation
       if (error) {
         newErrors[name] = error;
         isValid = false;
       }
     });
 
+    // Update both errors and touched states synchronously
     setErrors(newErrors);
+    setTouched(prev => ({ ...prev, ...newTouched }));
     return isValid;
   }, [validateField, validationRules, values]);
 

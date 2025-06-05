@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
       setProfile(data);
     } catch (err: unknown) {
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.error('Error loading profile:', err);
       }
       setProfile(null);
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (err) {
         if (mounted) {
-          if (import.meta.env.DEV) {
+          if (process.env.NODE_ENV === 'development') {
             console.error('Auth initialization error:', err);
           }
           clearTimeout(initTimeout);
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError(null); // Clear any connection errors on successful auth change
         setConnectionError(false);
       } catch (err) {
-        if (import.meta.env.DEV) {
+        if (process.env.NODE_ENV === 'development') {
           console.error('Auth state change error:', err);
         }
         setLoading(false);

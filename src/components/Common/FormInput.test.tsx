@@ -96,7 +96,9 @@ describe('FormInput', () => {
     const input = screen.getByLabelText(/test input/i);
     await userEvent.type(input, 'test value');
 
-    expect(mockOnChange).toHaveBeenCalledWith('test', 'test value');
+    // userEvent.type calls onChange for each character, so check the last call
+    expect(mockOnChange).toHaveBeenLastCalledWith('test', 'test value');
+    expect(mockOnChange).toHaveBeenCalledTimes(10); // 'test value' has 10 characters
   });
 
   it('calls onBlur when input loses focus', () => {
