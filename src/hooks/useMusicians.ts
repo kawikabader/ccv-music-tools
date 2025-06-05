@@ -15,17 +15,15 @@ export function useMusicians() {
       .channel('musicians_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'musicians' }, payload => {
         console.log('Change received!', payload);
-        // Only refetch if we're not already loading to avoid conflicts
-        if (!loading) {
-          fetchMusicians();
-        }
+        // Refetch on any change - let the loading state handle conflicts
+        fetchMusicians();
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, []); // Empty dependency array is correct here since we only want this to run once
 
   async function fetchMusicians() {
     try {
