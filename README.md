@@ -1,5 +1,7 @@
 # Musician Contact Directory
 
+[![Deploy to GitHub Pages](https://github.com/kawikabader/team-roster/actions/workflows/deploy.yml/badge.svg)](https://github.com/kawikabader/team-roster/actions/workflows/deploy.yml)
+
 A React-based web application for managing musician contacts, built with TypeScript, Tailwind CSS, and modern web technologies.
 
 ## Features
