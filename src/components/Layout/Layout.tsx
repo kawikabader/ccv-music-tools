@@ -1,12 +1,12 @@
 import React from 'react';
-import { useAuth } from '../../utils/auth';
+import { useAuth } from '../../utils/authSupabase';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps): JSX.Element {
-  const { user, logout } = useAuth();
+  const { user, profile, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -17,9 +17,9 @@ export function Layout({ children }: LayoutProps): JSX.Element {
               <div className="text-xl font-bold text-indigo-600">Band Contacts</div>
             </div>
             <div className="flex items-center">
-              <div className="text-sm text-gray-500 mr-4">{user?.name}</div>
+              <div className="text-sm text-gray-500 mr-4">{profile?.name || user?.email}</div>
               <button
-                onClick={logout}
+                onClick={signOut}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 Logout

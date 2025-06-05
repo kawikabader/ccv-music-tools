@@ -9,11 +9,18 @@ export function Musicians(): JSX.Element {
   const [musicians, setMusicians] = useState<Musician[]>([]);
   const [phoneInput, setPhoneInput] = useState('');
   const [nameInput, setNameInput] = useState('');
-  const { user, profile } = useAuth();
   const isAdmin = useIsAdmin();
 
   useEffect(() => {
-    setMusicians(getMusicians());
+    const loadMusicians = async () => {
+      try {
+        const data = await getMusicians();
+        setMusicians(data);
+      } catch (error) {
+        console.error('Error loading musicians:', error);
+      }
+    };
+    loadMusicians();
   }, []);
 
   const formatPhoneNumber = (value: string) => {
@@ -60,7 +67,7 @@ export function Musicians(): JSX.Element {
 
     const searchLower = searchTerm.toLowerCase().trim();
     const searchNumbers = searchTerm.replace(/[^0-9]/g, '');
-    const phoneNumbers = musician.phone.replace(/[^0-9]/g, '');
+    const phoneNumbers = musician.phone?.replace(/[^0-9]/g, '') || '';
 
     return (
       musician.name.toLowerCase().includes(searchLower) ||
@@ -68,12 +75,20 @@ export function Musicians(): JSX.Element {
     );
   });
 
-  const handleAddMusician = (newMusician: { name: string; phone: string }) => {
-    const musician = addMusician(newMusician);
-    setMusicians([...musicians, musician]);
-    setShowAddForm(false);
-    setPhoneInput('');
-    setNameInput('');
+  const handleAddMusician = async (newMusician: { name: string; phone: string }) => {
+    try {
+      const musician = await addMusician({
+        name: newMusician.name,
+        phone: newMusician.phone,
+        instrument: null, // Required field in Musician type
+      });
+      setMusicians([...musicians, musician]);
+      setShowAddForm(false);
+      setPhoneInput('');
+      setNameInput('');
+    } catch (error) {
+      console.error('Error adding musician:', error);
+    }
   };
 
   return (

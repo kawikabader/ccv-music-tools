@@ -4,7 +4,6 @@ import { AuthProvider } from './utils/authSupabase';
 import { NotificationProvider } from './context/NotificationContext';
 import { Layout } from './components/Layout/Layout';
 import { Login } from './components/Auth/Login';
-import { Musicians } from './pages/Musicians';
 import { useAuth } from './utils/authSupabase';
 import { MusicianList } from './components/MusicianList/MusicianList';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
