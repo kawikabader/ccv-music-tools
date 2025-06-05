@@ -96,7 +96,7 @@ export function MusicianList() {
         <div className="container mx-auto px-4 h-full flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <img
-              src="/logo-header.png"
+              src="/a.png"
               alt="Team Roster Logo"
               className="h-10 w-10"
             />
