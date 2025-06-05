@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useMusicians } from '../../hooks/useMusicians';
-import { useAuth } from '../../utils/auth';
+import { useAuth, useIsAdmin } from '../../utils/authSupabase';
 import { useNotification } from '../../context/NotificationContext';
 import type { Musician } from '../../types/supabase';
 import logoUrl from '../../assets/a.png';
 
 export function MusicianList() {
   const { musicians, loading, error, addMusician, updateMusician, deleteMusician } = useMusicians();
-  const { user, logout } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const isAdmin = useIsAdmin();
   const { addNotification } = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingMusician, setEditingMusician] = useState<Musician | null>(null);
@@ -58,7 +59,7 @@ export function MusicianList() {
   }
 
   function handleLogout() {
-    logout();
+    signOut();
     setShowProfileMenu(false);
   }
 

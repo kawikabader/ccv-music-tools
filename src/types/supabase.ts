@@ -1,9 +1,15 @@
-export type User = {
+export type Profile = {
   id: string;
   name: string;
-  username: string;
-  password: string;
   role: 'admin' | 'director';
+  created_at: string;
+  updated_at: string;
+};
+
+export type User = {
+  id: string;
+  email: string;
+  profile?: Profile;
 };
 
 export type Musician = {
@@ -16,10 +22,10 @@ export type Musician = {
 export type Database = {
   public: {
     Tables: {
-      users: {
-        Row: User;
-        Insert: Omit<User, 'id'>;
-        Update: Partial<Omit<User, 'id'>>;
+      profiles: {
+        Row: Profile;
+        Insert: Omit<Profile, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>;
       };
       musicians: {
         Row: Musician;
