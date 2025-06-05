@@ -56,27 +56,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
     const initTimeout = setTimeout(() => {
       if (mounted) {
+        console.log('⏰ Auth timeout reached - proceeding without session');
         setLoading(false);
         setConnectionError(true);
         // Don't set a blocking error - just mark connection as problematic
       }
-    }, 15000); // 15 second timeout for initial auth check
+    }, 5000); // 5 second timeout for initial auth check (reduced from 15)
 
     // Get initial session with timeout
     const initAuth = async () => {
       try {
+        console.log('🔐 Checking auth session...');
         const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Auth session error:', error);
+          throw error;
+        }
+
+        console.log('🔍 Session check result:', session ? 'User found' : 'No session');
 
         if (mounted) {
           if (session?.user) {
+            console.log('✅ User authenticated:', session.user.email);
             const user: User = {
               id: session.user.id,
               email: session.user.email!,
             };
             setUser(user);
             await loadProfile(session.user.id);
+          } else {
+            console.log('❌ No user session - user needs to log in');
           }
           clearTimeout(initTimeout);
           setLoading(false);
@@ -84,9 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (err) {
         if (mounted) {
-          if (process.env.NODE_ENV === 'development') {
-            console.error('Auth initialization error:', err);
-          }
+          console.error('❌ Auth initialization error:', err);
           clearTimeout(initTimeout);
           setLoading(false);
           setConnectionError(true);
