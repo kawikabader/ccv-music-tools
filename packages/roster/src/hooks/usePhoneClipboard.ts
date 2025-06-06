@@ -5,6 +5,11 @@ import {
   getPhoneFormatStats,
   type PhoneFormatOptions,
 } from '../utils/phoneFormatter';
+import {
+  useClipboardToast,
+  ClipboardToastVariants,
+} from '../components/UI/ClipboardToast';
+import { ClipboardErrorType, type ClipboardError } from './useClipboardError';
 import type { Musician } from '../types/supabase';
 
 export interface UsePhoneClipboardOptions extends PhoneFormatOptions {
@@ -38,6 +43,7 @@ export function usePhoneClipboard(
   options: UsePhoneClipboardOptions = {}
 ) {
   const clipboard = useClipboard();
+  const toast = useClipboardToast();
 
   const {
     autoClearSelection = false,
@@ -116,10 +122,32 @@ export function usePhoneClipboard(
         const success = await clipboard.copyToClipboard(formattedPhoneNumbers);
         if (success) {
           lastUpdatedRef.current = formattedPhoneNumbers;
+          // Show subtle success notification for auto-updates
+          toast.showToast({
+            ...ClipboardToastVariants.copySuccess(
+              phoneStats.validPhones,
+              formattedPhoneNumbers
+            ),
+            duration: 2000, // Shorter duration for auto-updates
+            animation: 'fade', // More subtle animation
+          });
         }
       } catch (error) {
         // Silent fail for auto-updates to avoid spamming errors
         console.warn('Auto-update clipboard failed:', error);
+        // Only show error if it's a permission or support issue
+        const clipboardError = clipboard.detailedError;
+        if (
+          clipboardError &&
+          (clipboardError.type === ClipboardErrorType.PERMISSION_DENIED ||
+            clipboardError.type === ClipboardErrorType.NOT_SUPPORTED)
+        ) {
+          if (clipboardError.type === ClipboardErrorType.PERMISSION_DENIED) {
+            toast.showPermissionDenied();
+          } else {
+            toast.showNotSupported();
+          }
+        }
       }
     }, autoUpdateDebounce);
 
@@ -140,7 +168,7 @@ export function usePhoneClipboard(
   ]);
 
   /**
-   * Copy formatted phone numbers to clipboard
+   * Copy formatted phone numbers to clipboard with integrated toast notifications
    * Returns success status and any error message
    */
   const copyPhoneNumbers = useCallback(async (): Promise<{
@@ -148,7 +176,12 @@ export function usePhoneClipboard(
     message: string;
     phoneCount: number;
   }> => {
+    // Validation checks with toast feedback
     if (selectedMusicians.length === 0) {
+      toast.showCopyError(
+        'No musicians selected',
+        'Please select some musicians first'
+      );
       return {
         success: false,
         message: 'No musicians selected',
@@ -157,6 +190,10 @@ export function usePhoneClipboard(
     }
 
     if (!formattedPhoneNumbers) {
+      toast.showCopyError(
+        'No valid phone numbers found',
+        "Selected musicians don't have valid phone numbers"
+      );
       return {
         success: false,
         message: 'No valid phone numbers found in selection',
@@ -164,25 +201,60 @@ export function usePhoneClipboard(
       };
     }
 
-    const success = await clipboard.copyToClipboard(formattedPhoneNumbers);
+    // Show loading toast
+    toast.showCopyLoading();
 
-    if (success) {
-      const phoneCount = phoneStats.validPhones;
+    try {
+      const success = await clipboard.copyToClipboard(formattedPhoneNumbers);
 
-      // Auto-clear selection if enabled
-      if (autoClearSelection && clearSelection) {
-        clearSelection();
+      if (success) {
+        const phoneCount = phoneStats.validPhones;
+
+        // Show success toast with details
+        toast.showCopySuccess(phoneCount, formattedPhoneNumbers);
+
+        // Auto-clear selection if enabled
+        if (autoClearSelection && clearSelection) {
+          clearSelection();
+        }
+
+        return {
+          success: true,
+          message: successMessage(phoneCount),
+          phoneCount,
+        };
+      } else {
+        // Handle different error types with specific toasts
+        const error = clipboard.detailedError;
+        if (error) {
+          switch (error.type) {
+            case ClipboardErrorType.PERMISSION_DENIED:
+              toast.showPermissionDenied();
+              break;
+            case ClipboardErrorType.NOT_SUPPORTED:
+              toast.showNotSupported();
+              break;
+            default:
+              toast.showCopyError(error.message, error.suggestedAction);
+          }
+        } else {
+          toast.showCopyError('Copy operation failed', 'Please try again');
+        }
+
+        return {
+          success: false,
+          message: clipboard.error || 'Failed to copy to clipboard',
+          phoneCount: 0,
+        };
       }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.showCopyError(errorMessage, 'Please try again or copy manually');
 
-      return {
-        success: true,
-        message: successMessage(phoneCount),
-        phoneCount,
-      };
-    } else {
       return {
         success: false,
-        message: clipboard.error || 'Failed to copy to clipboard',
+        message: errorMessage,
         phoneCount: 0,
       };
     }
@@ -194,6 +266,7 @@ export function usePhoneClipboard(
     autoClearSelection,
     clearSelection,
     successMessage,
+    toast,
   ]);
 
   /**
@@ -239,6 +312,15 @@ export function usePhoneClipboard(
     isSupported: clipboard.isSupported,
     isAutoUpdateEnabled: autoUpdateClipboard,
     lastAutoUpdated: lastUpdatedRef.current,
+
+    // Toast integration
+    toast: {
+      isVisible: toast.isVisible,
+      showCopyLoading: toast.showCopyLoading,
+      showCopySuccess: toast.showCopySuccess,
+      showCopyError: toast.showCopyError,
+      hideToast: toast.hideToast,
+    },
 
     // Utilities
     getPreview,

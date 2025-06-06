@@ -40,12 +40,12 @@
   + [x] 3.4 Handle dynamic clipboard updates when musicians are selected/deselected
   + [x] 3.5 Add error handling for clipboard API failures
   + [x] 3.6 Ensure browser compatibility fallbacks for older browsers
-* [ ] 4.0 Implement copy confirmation feedback
-  + [ ] 4.1 Create `CopyConfirmation` component for visual feedback
-  + [ ] 4.2 Design toast/notification styling that fits existing design system
-  + [ ] 4.3 Integrate confirmation component with clipboard operations
-  + [ ] 4.4 Add auto-dismiss functionality for confirmation messages
-  + [ ] 4.5 Ensure confirmation works on both successful copies and errors
+* [x] 4.0 Implement copy confirmation feedback
+  + [x] 4.1 Create `CopyConfirmation` component for visual feedback
+  + [x] 4.2 Design toast/notification styling that fits existing design system
+  + [x] 4.3 Integrate confirmation component with clipboard operations
+  + [x] 4.4 Add auto-dismiss functionality for confirmation messages
+  + [x] 4.5 Ensure confirmation works on both successful copies and errors
 * [ ] 5.0 Write comprehensive tests and ensure accessibility
   + [ ] 5.1 Write unit tests for `useMultiSelect` hook
   + [ ] 5.2 Write unit tests for `useClipboard` hook
