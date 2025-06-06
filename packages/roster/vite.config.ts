@@ -7,7 +7,7 @@ export default defineConfig({
   define: {
     'process.env': {},
   },
-  base: process.env.NODE_ENV === 'production' ? '/team-roster/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/roster/' : '/',
   build: {
     // Optimize build output
     target: 'esnext',

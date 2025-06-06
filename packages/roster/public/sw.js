@@ -1,6 +1,6 @@
 // Simple service worker for offline support
-const CACHE_NAME = 'team-roster-v1';
-const urlsToCache = ['/team-roster/', '/team-roster/index.html', '/team-roster/assets/'];
+const CACHE_NAME = 'roster-v1';
+const urlsToCache = ['/roster/', '/roster/index.html', '/roster/assets/'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -35,7 +35,7 @@ self.addEventListener('fetch', event => {
         }
         // If not in cache, return a basic offline page
         if (event.request.mode === 'navigate') {
-          return caches.match('/team-roster/index.html');
+          return caches.match('/roster/index.html');
         }
         throw new Error('Network failed and no cache available');
       });

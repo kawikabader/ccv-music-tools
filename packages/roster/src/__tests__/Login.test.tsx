@@ -10,23 +10,29 @@ import { AuthProvider } from '../utils/authSupabase';
 const mockSignIn = vi.fn();
 const mockClearError = vi.fn();
 
-vi.mock('../utils/authSupabase', () => ({
-  ...vi.importActual('../utils/authSupabase'),
-  useAuth: () => ({
-    signIn: mockSignIn,
-    loading: false,
-    error: null,
-    clearError: mockClearError,
-    user: null,
-  }),
-}));
+vi.mock('../utils/authSupabase', async () => {
+  const actual = await vi.importActual('../utils/authSupabase');
+  return {
+    ...actual,
+    useAuth: () => ({
+      signIn: mockSignIn,
+      loading: false,
+      error: null,
+      clearError: mockClearError,
+      user: null,
+    }),
+  };
+});
 
 // Mock react-router-dom
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', () => ({
-  ...vi.importActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
-}));
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 const LoginWrapper = () => (
   <BrowserRouter>

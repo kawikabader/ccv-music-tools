@@ -1,166 +1,116 @@
-# Musician Contact Directory
+# CCV Music Tools
 
-[![Deploy to GitHub Pages](https://github.com/kawikabader/team-roster/actions/workflows/deploy.yml/badge.svg)](https://github.com/kawikabader/team-roster/actions/workflows/deploy.yml)
+A monorepo of music-related tools and applications managed with pnpm.
 
-A React-based web application for managing musician contacts, built with TypeScript, Tailwind CSS, and modern web technologies.
+## Packages
 
-## Features
+* **[@ccv-music-tools/roster](./packages/roster)** - Team roster management application
 
-* 🔐 Secure authentication and role-based access control
-* 👥 Musician contact management (add, edit, view)
-* 🔍 Search and filter functionality
-* 📱 Responsive design for all devices
-* 🔔 Real-time notifications
-* ✅ Form validation
-* 🧪 Comprehensive test coverage
+## Live Deployment
 
-## Tech Stack
-
-* React 18
-* TypeScript
-* Tailwind CSS
-* Vite
-* React Router
-* Jest + React Testing Library
-* Cypress
-* GitHub Pages
-
-## Prerequisites
-
-* Node.js 18 or later
-* npm 9 or later
+* **Main Site**: [https://ccvmusic.tools](https://ccvmusic.tools) - Landing page
+* **Roster App**: [https://ccvmusic.tools/roster](https://ccvmusic.tools/roster) - Team roster application
 
 ## Getting Started
 
-1. Clone the repository:
-   
+### Prerequisites
+
+* Node.js >= 22.0.0 (LTS)
+* pnpm >= 10.0.0
+
+### Installation
 
 ```bash
-   git clone https://github.com/kawikabader/team-roster.git
-   cd team-roster
-   ```
+# Install pnpm globally if you haven't already
+npm install -g pnpm
 
-2. Install dependencies:
-   
+# Install all dependencies
+pnpm install
+```
+
+### Development
 
 ```bash
-   npm install
-   ```
+# Run all packages in development mode
+pnpm dev
 
-3. Set up Supabase:
-   - Create a free account at [Supabase](https://supabase.com)
-   - Create a new project
-   - Get your project URL and anon key from Project Settings > API
-   - Create a `.env` file in the root directory with:
+# Run specific package (roster)
+pnpm roster:dev
 
-     
+# Build all packages
+pnpm build
 
+# Run tests for all packages
+pnpm test
+
+# Lint all packages
+pnpm lint
+
+# Fix linting issues
+pnpm lint:fix
+
+# Format code in all packages
+pnpm format
 ```
-     VITE_SUPABASE_URL=your_supabase_project_url
-     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-     ```
 
-4. Set up your database tables:
-   
+### Package-specific Commands
 
-```sql
-   -- Users table
-   create table users (
-     id uuid default uuid_generate_v4() primary key,
-     name text not null,
-     username text unique not null,
-     password text not null,
-     role text not null check (role in ('admin', 'director'))
-   );
-
-   -- Musicians table
-   create table musicians (
-     id uuid default uuid_generate_v4() primary key,
-     name text not null,
-     instrument text,
-     phone text
-   );
-   ```
-
-5. Start the development server:
-   
+You can run commands in specific packages using pnpm filters:
 
 ```bash
-   npm run dev
-   ```
+# Run roster in development mode
+pnpm --filter @ccv-music-tools/roster dev
 
-4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+# Build only the roster package
+pnpm --filter @ccv-music-tools/roster build
 
-## Available Scripts
-
-* `npm run dev` - Start development server
-* `npm run build` - Build for production
-* `npm run preview` - Preview production build
-* `npm run test` - Run unit and integration tests
-* `npm run test:e2e` - Run end-to-end tests
-* `npm run lint` - Run ESLint
-* `npm run lint:fix` - Fix ESLint errors
-* `npm run format` - Format code with Prettier
-* `npm run deploy` - Deploy to GitHub Pages
-
-## Testing
-
-### Unit and Integration Tests
-
-```bash
-npm test
+# Test only the roster package
+pnpm --filter @ccv-music-tools/roster test
 ```
 
-### End-to-End Tests
+## Deployment
 
-```bash
-# Open Cypress Test Runner
-npm run cypress:open
+The monorepo automatically deploys to GitHub Pages with a custom domain:
 
-# Run tests in headless mode
-npm run cypress:run
+* **Automatic**: Push to `main` branch triggers GitHub Actions deployment
+* **Manual**: Use `workflow_dispatch` in GitHub Actions to trigger deployment
+* **Local Build**: `pnpm deploy:local` to test the deployment structure locally
 
-# Start dev server and run tests
-npm run test:e2e
+### Custom Domain Setup
+
+The repository is configured to deploy to `ccvmusic.tools` :
+* Root domain (`ccvmusic.tools`) shows a blank landing page
+* Roster app is available at `ccvmusic.tools/roster`
+* CNAME file configures the custom domain
+* GitHub Pages is set to use the custom domain
+
+## Monorepo Structure
+
+```
+ccv-music-tools/
+├── packages/
+│   └── roster/           # Team roster application
+├── package.json          # Root package.json with workspace scripts
+├── pnpm-workspace.yaml   # pnpm workspace configuration
+└── README.md            # This file
 ```
 
-## Project Structure
+## Adding New Packages
 
-```
-src/
-├── components/         # React components
-│   ├── Auth/          # Authentication components
-│   ├── Common/        # Shared components
-│   ├── Layout/        # Layout components
-│   └── Musicians/     # Musician-related components
-├── context/           # React context providers
-├── data/              # JSON data files
-├── hooks/             # Custom React hooks
-├── pages/             # Page components
-├── types/             # TypeScript type definitions
-└── utils/             # Utility functions
-```
+1. Create a new directory under `packages/`
+2. Add a `package.json` with name `@ccv-music-tools/package-name`
+3. The package will automatically be included in the workspace
 
-## Authentication
+## Scripts
 
-The application uses Supabase authentication.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+* `pnpm dev` - Start development for the default package (roster)
+* `pnpm build` - Build all packages
+* `pnpm test` - Run tests for all packages
+* `pnpm lint` - Lint all packages
+* `pnpm format` - Format code in all packages
+* `pnpm clean` - Clean all node_modules and build artifacts
+* `pnpm roster:*` - Package-specific commands for the roster app
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-* [React](https://reactjs.org/)
-* [Tailwind CSS](https://tailwindcss.com/)
-* [Vite](https://vitejs.dev/)
-* [Cypress](https://www.cypress.io/)
-* [Jest](https://jestjs.io/)
+MIT

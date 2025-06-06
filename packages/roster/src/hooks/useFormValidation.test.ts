@@ -27,7 +27,9 @@ describe('useFormValidation', () => {
   };
 
   it('initializes with default values', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     expect(result.current.values).toEqual(initialValues);
     expect(result.current.errors).toEqual({});
@@ -35,7 +37,9 @@ describe('useFormValidation', () => {
   });
 
   it('handles field changes', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     act(() => {
       result.current.handleChange('name', 'John');
@@ -45,7 +49,9 @@ describe('useFormValidation', () => {
   });
 
   it('handles field blur', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     act(() => {
       result.current.handleBlur('name');
@@ -55,17 +61,23 @@ describe('useFormValidation', () => {
   });
 
   it('validates required fields', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     act(() => {
       result.current.handleBlur('name');
     });
 
-    expect(result.current.errors.name).toBe('Name must be at least 2 characters long');
+    expect(result.current.errors.name).toBe(
+      'Name must be at least 2 characters long'
+    );
   });
 
   it('validates email format', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     act(() => {
       result.current.handleChange('email', 'invalid-email');
@@ -76,7 +88,9 @@ describe('useFormValidation', () => {
   });
 
   it('validates phone number format', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     act(() => {
       result.current.handleChange('phone', '123');
@@ -87,18 +101,31 @@ describe('useFormValidation', () => {
   });
 
   it('clears errors when valid values are entered', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
+    // First trigger an error
     act(() => {
-      result.current.handleChange('name', 'John');
       result.current.handleBlur('name');
     });
 
-    expect(result.current.errors.name).toBeUndefined();
+    expect(result.current.errors.name).toBe(
+      'Name must be at least 2 characters long'
+    );
+
+    // Then enter a valid value to clear the error
+    act(() => {
+      result.current.handleChange('name', 'John');
+    });
+
+    expect(result.current.errors.name).toBe('');
   });
 
   it('validates entire form', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     act(() => {
       const isValid = result.current.validateForm();
@@ -113,7 +140,9 @@ describe('useFormValidation', () => {
   });
 
   it('returns true when form is valid', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     act(() => {
       result.current.handleChange('name', 'John');
@@ -130,7 +159,9 @@ describe('useFormValidation', () => {
   });
 
   it('resets form to initial values', () => {
-    const { result } = renderHook(() => useFormValidation(initialValues, validationRules));
+    const { result } = renderHook(() =>
+      useFormValidation(initialValues, validationRules)
+    );
 
     act(() => {
       result.current.handleChange('name', 'John');
