@@ -33,13 +33,13 @@
   + [x] 2.4 Ensure selection indicators are accessible with proper ARIA attributes
   + [x] 2.5 Make selection work on both desktop and mobile (touch-friendly)
   + [x] 2.6 Add keyboard navigation support (Space/Enter to toggle selection)
-* [ ] 3.0 Create clipboard management functionality
-  + [ ] 3.1 Create `useClipboard` custom hook using modern Clipboard API
-  + [ ] 3.2 Implement `phoneFormatter` utility to format numbers for Apple Messages
-  + [ ] 3.3 Create function to update clipboard with comma-separated phone numbers
-  + [ ] 3.4 Handle dynamic clipboard updates when musicians are selected/deselected
-  + [ ] 3.5 Add error handling for clipboard API failures
-  + [ ] 3.6 Ensure browser compatibility fallbacks for older browsers
+* [x] 3.0 Create clipboard management functionality
+  + [x] 3.1 Create `useClipboard` custom hook using modern Clipboard API
+  + [x] 3.2 Implement `phoneFormatter` utility to format numbers for Apple Messages
+  + [x] 3.3 Create function to update clipboard with comma-separated phone numbers
+  + [x] 3.4 Handle dynamic clipboard updates when musicians are selected/deselected
+  + [x] 3.5 Add error handling for clipboard API failures
+  + [x] 3.6 Ensure browser compatibility fallbacks for older browsers
 * [ ] 4.0 Implement copy confirmation feedback
   + [ ] 4.1 Create `CopyConfirmation` component for visual feedback
   + [ ] 4.2 Design toast/notification styling that fits existing design system
