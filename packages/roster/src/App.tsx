@@ -15,8 +15,8 @@ function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element 
 }
 
 export function App(): JSX.Element {
-  // Use basename only in production
-  const basename = import.meta.env.PROD ? '/roster' : '';
+  // Use basename in both dev and production
+  const basename = '/roster';
 
   return (
     <Router basename={basename}>

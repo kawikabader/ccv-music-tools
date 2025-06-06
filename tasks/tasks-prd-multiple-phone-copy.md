@@ -26,13 +26,13 @@
   + [x] 1.3 Implement `isSelected` function to check if a musician is currently selected
   + [x] 1.4 Add `clearSelection` function to reset all selections
   + [x] 1.5 Ensure selection state doesn't persist between page refreshes
-* [ ] 2.0 Add visual selection indicators to musician list
-  + [ ] 2.1 Modify `MusicianList` component to accept selection state and handlers
-  + [ ] 2.2 Add click handlers to musician list items for selection toggling
-  + [ ] 2.3 Implement visual selection styles (highlighted background, checkmark, or border)
-  + [ ] 2.4 Ensure selection indicators are accessible with proper ARIA attributes
-  + [ ] 2.5 Make selection work on both desktop and mobile (touch-friendly)
-  + [ ] 2.6 Add keyboard navigation support (Space/Enter to toggle selection)
+* [x] 2.0 Add visual selection indicators to musician list
+  + [x] 2.1 Modify `MusicianList` component to accept selection state and handlers
+  + [x] 2.2 Add click handlers to musician list items for selection toggling
+  + [x] 2.3 Implement visual selection styles (highlighted background, checkmark, or border)
+  + [x] 2.4 Ensure selection indicators are accessible with proper ARIA attributes
+  + [x] 2.5 Make selection work on both desktop and mobile (touch-friendly)
+  + [x] 2.6 Add keyboard navigation support (Space/Enter to toggle selection)
 * [ ] 3.0 Create clipboard management functionality
   + [ ] 3.1 Create `useClipboard` custom hook using modern Clipboard API
   + [ ] 3.2 Implement `phoneFormatter` utility to format numbers for Apple Messages
