@@ -47,7 +47,7 @@ Based on `prd-coffee.md`
   + [x] 1.1 Create new `packages/coffee` directory in monorepo
   + [x] 1.2 Initialize `package.json` with React, TypeScript, Vite, Tailwind CSS, Supabase, and testing dependencies
   + [x] 1.3 Configure `vite.config.ts` for GitHub Pages deployment with base path `/coffee`
-  + [x] 1.4 Setup TypeScript configuration files (`tsconfig.json`,                                `tsconfig.app.json`,                                `tsconfig.node.json`)
+  + [x] 1.4 Setup TypeScript configuration files (`tsconfig.json`,                                      `tsconfig.app.json`,                                      `tsconfig.node.json`)
   + [x] 1.5 Configure Tailwind CSS with `tailwind.config.js` following existing patterns
   + [x] 1.6 Setup Jest testing configuration with `jest.config.js` and `setupTests.ts`
   + [x] 1.7 Create basic project structure with `src` directories for components, lib, types, hooks, utils
@@ -55,8 +55,8 @@ Based on `prd-coffee.md`
   + [x] 1.9 Update root workspace `pnpm-workspace.yaml` to include coffee package
 
 * [ ] 2.0 Database Schema & Supabase Integration
-  + [ ] 2.1 Create Supabase project and obtain connection credentials
-  + [ ] 2.2 Create `campuses` table with id, name, address, latitude, longitude columns
+  + [x] 2.1 Create Supabase project and obtain connection credentials
+  + [x] 2.2 Create `campuses` table with id, name, address, latitude, longitude columns
   + [ ] 2.3 Create `coffee_shops` table with id, name, address, latitude, longitude, campus_id, distance_miles, drive_time_minutes columns
   + [ ] 2.4 Populate `campuses` table with all 18 CCV campus locations from PRD
   + [ ] 2.5 Setup Supabase client configuration in `src/lib/supabase.ts`
