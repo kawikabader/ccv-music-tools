@@ -59,7 +59,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('⏰ Auth timeout reached - proceeding without session');
         setLoading(false);
         setConnectionError(true);
-        // Don't set a blocking error - just mark connection as problematic
+
+        // Development bypass: auto-login on timeout in dev mode
+        if (import.meta.env.DEV) {
+          console.log('🔧 Development mode: Auto-login after timeout');
+          const mockUser: User = {
+            id: 'dev-user-id',
+            email: 'dev@test.com',
+          };
+          const mockProfile: Profile = {
+            id: 'dev-user-id',
+            name: 'Development User',
+            role: 'admin',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          setUser(mockUser);
+          setProfile(mockProfile);
+        }
       }
     }, 5000); // 5 second timeout for initial auth check (reduced from 15)
 
@@ -87,6 +104,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await loadProfile(session.user.id);
           } else {
             console.log('❌ No user session - user needs to log in');
+
+            // Development bypass: auto-login when Supabase is not configured
+            if (import.meta.env.DEV && connectionError) {
+              console.log('🔧 Development mode: Using mock authentication');
+              const mockUser: User = {
+                id: 'dev-user-id',
+                email: 'dev@test.com',
+              };
+              const mockProfile: Profile = {
+                id: 'dev-user-id',
+                name: 'Development User',
+                role: 'admin',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              };
+              setUser(mockUser);
+              setProfile(mockProfile);
+            }
           }
           clearTimeout(initTimeout);
           setLoading(false);

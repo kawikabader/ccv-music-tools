@@ -6,6 +6,7 @@ import type { Musician } from '../../types/supabase';
 import logoUrl from '../../assets/a.png';
 
 interface MusicianListProps {
+  musicians?: Musician[];
   selectedIds?: Set<string>;
   onToggleSelection?: (id: string) => void;
   isSelected?: (id: string) => boolean;
@@ -13,11 +14,15 @@ interface MusicianListProps {
 
 export function MusicianList(props: MusicianListProps = {}) {
   const {
+    musicians: propMusicians,
     selectedIds = new Set(),
     onToggleSelection,
     isSelected
   } = props;
-  const { musicians, loading, error, addMusician, updateMusician, deleteMusician } = useMusicians();
+  const { musicians: hookMusicians, loading, error, addMusician, updateMusician, deleteMusician } = useMusicians();
+
+  // Use prop musicians if provided, otherwise use hook musicians
+  const musicians = propMusicians || hookMusicians;
   const { user, profile, signOut } = useAuth();
   const isAdmin = useIsAdmin();
   const { addNotification } = useNotification();
@@ -148,8 +153,9 @@ export function MusicianList(props: MusicianListProps = {}) {
     }
   }
 
-  if (loading) return <div className="text-center p-4">Loading musicians...</div>;
-  if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
+  // Only show loading/error states if we're not using prop musicians
+  if (!propMusicians && loading) return <div className="text-center p-4">Loading musicians...</div>;
+  if (!propMusicians && error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -349,20 +355,15 @@ export function MusicianList(props: MusicianListProps = {}) {
                   ) : (
                     <>
                       <div
-                        className="flex-1 cursor-pointer group"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCopyPhone(musician.phone, musician.name);
-                        }}
-                        title={musician.phone ? `Click to copy ${musician.name}'s phone number` : `${musician.name} has no phone number`}
+                        className="flex-1 pointer-events-none"
                       >
-                        <h3 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
+                        <h3 className="text-lg font-semibold transition-colors">
                           {musician.name}
                         </h3>
-                        <p className="text-gray-600 group-hover:text-gray-800 transition-colors">
+                        <p className="text-gray-600 transition-colors">
                           {musician.instrument && `${musician.instrument} • `}
                           {musician.phone ? (
-                            <span className="font-mono bg-gray-100 px-2 py-1 rounded group-hover:bg-indigo-100 transition-colors">
+                            <span className="font-mono bg-gray-100 px-2 py-1 rounded transition-colors">
                               {musician.phone}
                             </span>
                           ) : (

@@ -8,8 +8,10 @@ export interface PhoneFormatOptions {
   includeCountryCode?: boolean;
   /** Country code to use if not present (default: '1' for US) */
   defaultCountryCode?: string;
-  /** Separator between phone numbers when formatting multiple (default: ', ') */
+  /** Separator between phone numbers when formatting multiple (default: '; ' for Apple Messages compatibility) */
   separator?: string;
+  /** Format specifically for Apple Messages with (555) 123-4567 format (default: false) */
+  appleMessagesFormat?: boolean;
 }
 
 /**
@@ -39,7 +41,11 @@ export function formatPhoneNumber(
     return null;
   }
 
-  const { includeCountryCode = true, defaultCountryCode = '1' } = options;
+  const {
+    includeCountryCode = true,
+    defaultCountryCode = '1',
+    appleMessagesFormat = false,
+  } = options;
 
   const cleaned = cleanPhoneNumber(phone.trim());
 
@@ -47,31 +53,44 @@ export function formatPhoneNumber(
     return null; // Invalid phone number
   }
 
+  let finalNumber = '';
+
   // If phone already has country code (starts with + or is longer than 10 digits)
   if (hasCountryCode(cleaned)) {
     if (cleaned.startsWith('+')) {
-      return cleaned; // Already properly formatted
+      finalNumber = includeCountryCode ? cleaned : cleaned.slice(-10);
+    } else {
+      // Assume the extra digits are country code
+      finalNumber = includeCountryCode ? `+${cleaned}` : cleaned.slice(-10);
     }
-    // Assume the extra digits are country code
-    return includeCountryCode ? `+${cleaned}` : cleaned.slice(-10);
   }
-
   // Standard 10-digit US number
-  if (cleaned.length === 10) {
-    return includeCountryCode ? `+${defaultCountryCode}${cleaned}` : cleaned;
+  else if (cleaned.length === 10) {
+    finalNumber = includeCountryCode
+      ? `+${defaultCountryCode}${cleaned}`
+      : cleaned;
   }
-
   // 11-digit number starting with 1 (US format)
-  if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    return includeCountryCode ? `+${cleaned}` : cleaned.slice(1);
+  else if (cleaned.length === 11 && cleaned.startsWith('1')) {
+    finalNumber = includeCountryCode ? `+${cleaned}` : cleaned.slice(1);
   }
-
   // Fallback: treat as international if longer than 11 digits
-  if (cleaned.length > 11) {
-    return includeCountryCode ? `+${cleaned}` : cleaned;
+  else if (cleaned.length > 11) {
+    finalNumber = includeCountryCode ? `+${cleaned}` : cleaned;
+  } else {
+    return null; // Unable to format
   }
 
-  return null; // Unable to format
+  // Apply Apple Messages specific formatting
+  if (appleMessagesFormat && finalNumber && !includeCountryCode) {
+    // Remove any + signs and format as (555) 123-4567
+    const digitsOnly = finalNumber.replace(/[^\d]/g, '');
+    if (digitsOnly.length === 10) {
+      return `(${digitsOnly.slice(0, 3)}) ${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`;
+    }
+  }
+
+  return finalNumber;
 }
 
 /**
@@ -82,7 +101,7 @@ export function formatPhoneNumbers(
   phones: (string | null | undefined)[],
   options: PhoneFormatOptions = {}
 ): string {
-  const { separator = ', ' } = options;
+  const { separator = '; ' } = options;
 
   const formatted = phones
     .map(phone => formatPhoneNumber(phone, options))
@@ -129,4 +148,34 @@ export function getPhoneFormatStats(phones: (string | null | undefined)[]): {
     invalid,
     validPercentage: Math.round(validPercentage * 100) / 100,
   };
+}
+
+/**
+ * Predefined format presets for different messaging platforms
+ */
+export const PHONE_FORMAT_PRESETS = {
+  /** Apple Messages - newline separated with (555) 123-4567 format */
+  APPLE_MESSAGES: {
+    separator: '\n',
+    includeCountryCode: false,
+    appleMessagesFormat: true,
+  },
+  /** WhatsApp - plus format with commas */
+  WHATSAPP: { separator: ', ', includeCountryCode: true },
+  /** SMS - newline separated for copy/paste */
+  SMS: { separator: '\n', includeCountryCode: false },
+  /** General - comma separated */
+  GENERAL: { separator: ', ', includeCountryCode: false },
+} as const;
+
+/**
+ * Formats phone numbers with Apple Messages optimized format
+ */
+export function formatForAppleMessages<T extends { phone?: string | null }>(
+  objects: T[]
+): string {
+  return formatPhoneNumbersFromObjects(
+    objects,
+    PHONE_FORMAT_PRESETS.APPLE_MESSAGES
+  );
 }

@@ -5,7 +5,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { Layout } from './components/Layout/Layout';
 import { Login } from './components/Auth/Login';
 import { useAuth } from './utils/authSupabase';
-import { MusicianList } from './components/MusicianList/MusicianList';
+import { MusicianListWithMultiSelect } from './components/MusicianList/MusicianListWithMultiSelect';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { OfflineDetector } from './components/Common/OfflineDetector';
 
@@ -29,7 +29,7 @@ export function App(): JSX.Element {
               path="/musicians"
               element={
                 <ProtectedRoute>
-                  <MusicianList />
+                  <MusicianListWithMultiSelect />
                 </ProtectedRoute>
               }
             />
