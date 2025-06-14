@@ -8,12 +8,17 @@ import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { MusicianListWithMultiSelect } from './components/MusicianList/MusicianListWithMultiSelect';
 import { OfflineDetector } from './components/Common/OfflineDetector';
 import { LogViewer } from './components/Debug/LogViewer';
+import { DebugSupabase } from './components/DebugSupabase';
 
 // Router configuration with future flags to eliminate warnings
 const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />
+  },
+  {
+    path: "/debug",
+    element: <DebugSupabase />
   },
   {
     path: "/musicians",

@@ -16,18 +16,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-// Create Supabase client with industry standard session management
+// Create the most minimal Supabase client possible
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // Disable all auth features for now
-    storage: window.localStorage,
     autoRefreshToken: false,
     persistSession: false,
     detectSessionInUrl: false,
-    flowType: 'pkce',
-    storageKey: 'ccv-roster-auth-token',
   },
-  // Completely disable realtime to prevent WebSocket errors
   realtime: {
     params: {
       eventsPerSecond: 0,
@@ -39,23 +34,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     },
   },
 });
-
-// Test connection on initialization (development only)
-if (import.meta.env.DEV) {
-  (async () => {
-    try {
-      const { error } = await supabase
-        .from('musicians')
-        .select('count', { count: 'exact', head: true });
-
-      if (error) {
-        console.error('Supabase connection error:', error);
-      }
-    } catch (err: unknown) {
-      console.error('Supabase connection failed:', err);
-    }
-  })();
-}
 
 // Helper function to get current session
 export const getCurrentSession = () => {

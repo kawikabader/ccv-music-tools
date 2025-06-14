@@ -80,7 +80,7 @@ create table users (
   name text not null,
   username text unique not null,
   password text not null,
-  role text not null check (role in ('admin', 'director'))
+  role text not null check (role in ('MD', 'admin'))
 );
 
 -- Musicians table

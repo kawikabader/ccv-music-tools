@@ -3,7 +3,7 @@ import { useAuth } from '../../utils/authSupabase';
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'director';
+  requiredRole?: 'MD' | 'admin';
 };
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {

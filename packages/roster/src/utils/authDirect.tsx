@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { supabase } from '../lib/supabase';
-import type { User, Profile } from '../types/supabase';
-import type { AuthError, Session } from '@supabase/supabase-js';
+import { directAuth, type AuthUser, type AuthSession } from '../lib/directAuth';
+import { supabase } from '../lib/supabase'; // Still need this for database operations
+import type { Profile } from '../types/supabase';
 import * as logger from './logger';
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   profile: Profile | null;
   loading: boolean;
   error: string | null;
@@ -26,7 +26,7 @@ const SESSION_STORAGE_KEY = 'ccv-roster-session-preference';
 const REMEMBER_ME_KEY = 'ccv-roster-remember-me';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,10 +85,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Refresh session manually
   const refreshSession = useCallback(async () => {
     try {
-      const { data, error } = await supabase.auth.refreshSession();
-      if (error) throw error;
+      const result = await directAuth.refreshSession();
+      if (result.error) throw new Error(result.error.message);
 
-      if (data.session) {
+      if (result.session) {
         // Session refreshed successfully
         setIsSessionValid(true);
         setConnectionError(false);
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check if session is still valid
   const checkSessionValidity = useCallback(async () => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const { data, error } = await directAuth.getSession();
 
       if (error) {
         logger.warn(logger.LogCategory.AUTH, 'Session validation failed', { error: error.message });
@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      if (user) {
+      if (data.session) {
         setIsSessionValid(true);
         return true;
       }
@@ -130,27 +130,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
     let sessionCheckInterval: NodeJS.Timeout;
 
-    const initTimeout = setTimeout(() => {
-      if (mounted) {
-        logger.warn(logger.LogCategory.AUTH, 'Auth initialization timeout reached');
-        setLoading(false);
-        setConnectionError(true);
-      }
-    }, 15000); // Increased from 3000 to 15000ms
-
-    // Get initial session with timeout
     const initAuth = async () => {
       try {
-        // Create a race between the session request and a timeout
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Session request timeout')), 20000)
-        );
+        logger.info(logger.LogCategory.AUTH, 'Initializing direct auth...');
 
-        const { data: { session }, error } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any;
+        // Get initial session using direct auth
+        const { data, error } = await directAuth.getSession();
 
         if (error) {
           logger.error(logger.LogCategory.AUTH, 'Auth session error', { error });
@@ -158,27 +143,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (mounted) {
-          if (session?.user) {
-            const user: User = {
-              id: session.user.id,
-              email: session.user.email!,
-            };
+          if (data.session?.user) {
+            const user: AuthUser = data.session.user;
             setUser(user);
             setIsSessionValid(true);
-            await loadProfile(session.user.id);
+            await loadProfile(user.id);
+            logger.info(logger.LogCategory.AUTH, 'User session restored', { userId: user.id });
           } else {
             setUser(null);
             setProfile(null);
             setIsSessionValid(false);
+            logger.info(logger.LogCategory.AUTH, 'No active session found');
           }
-          clearTimeout(initTimeout);
           setLoading(false);
           setConnectionError(false);
         }
       } catch (err: any) {
         if (mounted) {
           logger.error(logger.LogCategory.AUTH, 'Auth initialization error', { error: err.message || err });
-          clearTimeout(initTimeout);
           setLoading(false);
           setConnectionError(true);
           setIsSessionValid(false);
@@ -195,21 +177,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }, 5 * 60 * 1000); // 5 minutes
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Listen for auth changes using direct auth
+    const unsubscribe = directAuth.onAuthStateChange(async (session) => {
       if (!mounted) return;
 
       try {
         if (session?.user) {
-          const user: User = {
-            id: session.user.id,
-            email: session.user.email!,
-          };
+          const user: AuthUser = session.user;
           setUser(user);
           setIsSessionValid(true);
-          await loadProfile(session.user.id);
+          await loadProfile(user.id);
 
           // Handle remember me functionality based on current session
           const rememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
@@ -227,19 +204,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
           setIsSessionValid(false);
 
-          // Clean up session storage only if not intentionally signed out
-          const sessionPreference = localStorage.getItem(SESSION_STORAGE_KEY);
-          if (event !== 'SIGNED_OUT' || sessionPreference !== 'persistent') {
-            localStorage.removeItem(SESSION_STORAGE_KEY);
-            localStorage.removeItem(REMEMBER_ME_KEY);
-          }
+          // Clean up session storage
+          localStorage.removeItem(SESSION_STORAGE_KEY);
+          localStorage.removeItem(REMEMBER_ME_KEY);
           sessionStorage.removeItem(SESSION_STORAGE_KEY);
         }
         setLoading(false);
         setError(null);
         setConnectionError(false);
       } catch (err: any) {
-        logger.error(logger.LogCategory.AUTH, 'Auth state change error', { error: err.message || err, event });
+        logger.error(logger.LogCategory.AUTH, 'Auth state change error', { error: err.message || err });
         setLoading(false);
         setConnectionError(true);
         setIsSessionValid(false);
@@ -257,10 +231,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false;
-      clearTimeout(initTimeout);
       clearInterval(sessionCheckInterval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      subscription.unsubscribe();
+      unsubscribe();
     };
   }, [user, checkSessionValidity]);
 
@@ -273,45 +246,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Store remember me preference before signing in
       localStorage.setItem(REMEMBER_ME_KEY, rememberMe.toString());
 
-      // Simple timeout without AbortController to test if that's the issue
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      logger.info(logger.LogCategory.AUTH, 'Attempting sign in', { email });
 
-      if (error) throw error;
+      const result = await directAuth.signInWithPassword({ email, password });
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+
+      if (!result.user || !result.session) {
+        throw new Error('Invalid authentication response');
+      }
 
       // Handle remember me logic after successful login
       if (rememberMe) {
         // Store session preference for persistent login
         localStorage.setItem(SESSION_STORAGE_KEY, 'persistent');
-        // Force refresh token to ensure long-term persistence
-        try {
-          const refreshController = new AbortController();
-          const refreshTimeoutId = setTimeout(() => refreshController.abort(), 30000);
-
-          await supabase.auth.refreshSession();
-          clearTimeout(refreshTimeoutId);
-        } catch (refreshErr) {
-          // Log refresh error but don't fail the entire login
-          console.warn('Session refresh failed:', refreshErr);
-        }
+        logger.info(logger.LogCategory.AUTH, 'Persistent session enabled');
       } else {
         // For temporary sessions, we'll rely on the natural session expiration
         sessionStorage.setItem(SESSION_STORAGE_KEY, 'temporary');
         // Clear any existing persistent session data
         localStorage.removeItem(SESSION_STORAGE_KEY);
+        logger.info(logger.LogCategory.AUTH, 'Temporary session enabled');
       }
+
+      logger.info(logger.LogCategory.AUTH, 'Sign in successful', { userId: result.user.id });
 
       // User and profile will be set by the auth state change listener
     } catch (err: any) {
-      const authError = err as AuthError;
-      if (authError.name === 'AbortError') {
-        setError('Sign in timed out. Please check your connection and try again.');
-        setConnectionError(true);
-      } else {
-        setError(authError.message || 'An error occurred during sign in');
-      }
+      const errorMessage = err.message || 'An error occurred during sign in';
+      logger.error(logger.LogCategory.AUTH, 'Sign in failed', { error: errorMessage });
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -324,35 +290,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       setConnectionError(false);
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-          },
-        },
-      });
-
-      clearTimeout(timeoutId);
-
-      if (error) throw error;
-
-      // Check if user needs to confirm email
-      if (data.user && !data.session) {
-        setError('Please check your email to confirm your account');
-      }
+      // Note: Direct auth doesn't implement signUp yet, would need to add this
+      // For now, throw an error to indicate it's not implemented
+      throw new Error('Sign up not implemented with direct auth yet');
     } catch (err: any) {
-      const authError = err as AuthError;
-      if (authError.name === 'AbortError') {
-        setError('Sign up timed out. Please check your connection and try again.');
-        setConnectionError(true);
-      } else {
-        setError(authError.message || 'An error occurred during sign up');
-      }
+      const errorMessage = err.message || 'An error occurred during sign up';
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -364,15 +307,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       setConnectionError(false);
 
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      logger.info(logger.LogCategory.AUTH, 'Signing out');
+
+      const result = await directAuth.signOut();
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
 
       // Clean up all session storage on explicit sign out
       localStorage.removeItem(REMEMBER_ME_KEY);
       localStorage.removeItem(SESSION_STORAGE_KEY);
       sessionStorage.removeItem(SESSION_STORAGE_KEY);
+
+      logger.info(logger.LogCategory.AUTH, 'Sign out successful');
     } catch (err: any) {
-      setError(err instanceof Error ? err.message : 'An error occurred during sign out');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during sign out';
+      setError(errorMessage);
       throw err;
     }
   };
@@ -397,61 +347,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  // Try to get context, if it fails, provide fallback
-  try {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-      // Fallback for when no provider is available
-      return {
-        user: { id: 'guest', email: 'guest@example.com' },
-        profile: { name: 'Guest User', role: 'user' as const },
-        loading: false,
-        error: null,
-        connectionError: false,
-        isSessionValid: true,
-        signIn: async () => { },
-        signUp: async () => { },
-        signOut: async () => { },
-        clearError: () => { },
-        refreshSession: async () => { }
-      };
-    }
-    return context;
-  } catch {
-    // Fallback for any errors
-    return {
-      user: { id: 'guest', email: 'guest@example.com' },
-      profile: { name: 'Guest User', role: 'user' as const },
-      loading: false,
-      error: null,
-      connectionError: false,
-      isSessionValid: true,
-      signIn: async () => { },
-      signUp: async () => { },
-      signOut: async () => { },
-      clearError: () => { },
-      refreshSession: async () => { }
-    };
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
+  return context;
 }
 
-// Helper function to check if user has admin role
+// Admin check hook - simplified for direct auth
 export function useIsAdmin() {
-  try {
-    const { profile } = useAuth();
-    return profile?.role === 'admin';
-  } catch {
-    return false;
-  }
+  const { user } = useAuth();
+  // For now, just return false since we don't have admin logic implemented
+  // This would need to be implemented based on your admin user logic
+  return false;
 }
 
-// Helper function to check if user has admin or MD role
+// View musicians permission hook - simplified for direct auth
 export function useCanViewMusicians() {
-  try {
-    const { profile, loading } = useAuth();
-    if (loading) return false;
-    return profile?.role === 'admin' || profile?.role === 'MD';
-  } catch {
-    return true; // Allow viewing for guests
-  }
+  const { user } = useAuth();
+  // For now, just return true if user is authenticated
+  return !!user;
 } 

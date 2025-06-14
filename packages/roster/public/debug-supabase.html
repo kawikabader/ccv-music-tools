@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Debug Test</title>
+</head>
+
+<body>
+  <h1>Supabase Connection Debug</h1>
+  <div id="results"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+
+    const results = document.getElementById('results');
+
+    function log(message, type = 'info') {
+      const div = document.createElement('div');
+      div.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      results.appendChild(div);
+      console.log(message);
+    }
+
+    // Test environment variables
+    const supabaseUrl = 'https://uuinnbmmkfdevpctnqmy.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1aW5uYm1ta2ZkZXZwY3RucW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NjgxNTEsImV4cCI6MjA2NDA0NDE1MX0.VYTtk8E8jNmiJqUQtHesWSuC_0NWQPzM2_lKSlmDpjo';
+
+    log(`Testing Supabase connection to: ${supabaseUrl}`);
+
+    // Test 1: Basic client creation
+    try {
+      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          storage: window.localStorage,
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: false,
+        }
+      });
+      log('✅ Supabase client created successfully', 'success');
+
+      // Test 2: Get session
+      log('Testing getSession()...');
+      const sessionStart = Date.now();
+
+      supabase.auth.getSession()
+        .then(({ data, error }) => {
+          const duration = Date.now() - sessionStart;
+          if (error) {
+            log(`❌ getSession() failed after ${duration}ms: ${error.message}`, 'error');
+          } else {
+            log(`✅ getSession() succeeded after ${duration}ms`, 'success');
+            log(`Session: ${data.session ? 'Active' : 'None'}`);
+          }
+        })
+        .catch(err => {
+          const duration = Date.now() - sessionStart;
+          log(`❌ getSession() threw error after ${duration}ms: ${err.message}`, 'error');
+        });
+
+      // Test 3: Test login
+      setTimeout(() => {
+        log('Testing signInWithPassword()...');
+        const loginStart = Date.now();
+
+        supabase.auth.signInWithPassword({
+          email: 'md@test.com',
+          password: 'password123'
+        })
+          .then(({ data, error }) => {
+            const duration = Date.now() - loginStart;
+            if (error) {
+              log(`❌ Login failed after ${duration}ms: ${error.message}`, 'error');
+            } else {
+              log(`✅ Login succeeded after ${duration}ms`, 'success');
+              log(`User: ${data.user?.email || 'None'}`);
+            }
+          })
+          .catch(err => {
+            const duration = Date.now() - loginStart;
+            log(`❌ Login threw error after ${duration}ms: ${err.message}`, 'error');
+          });
+      }, 2000);
+
+    } catch (err) {
+      log(`❌ Failed to create Supabase client: ${err.message}`, 'error');
+    }
+  </script>
+</body>
+
+</html>
