@@ -4,12 +4,7 @@ import type { Database } from '../types/supabase';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Enhanced debugging for production
-console.log('🔧 Supabase Configuration Check:');
-console.log('URL present:', !!supabaseUrl);
-console.log('Key present:', !!supabaseAnonKey);
-console.log('Environment mode:', import.meta.env.MODE);
-
+// Check configuration
 if (!supabaseUrl || !supabaseAnonKey) {
   const errorMsg = `Missing Supabase environment variables:
     - VITE_SUPABASE_URL: ${supabaseUrl ? '✅ Set' : '❌ Missing'}
@@ -21,7 +16,29 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+// Create Supabase client with industry standard session management
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Disable all auth features for now
+    storage: window.localStorage,
+    autoRefreshToken: false,
+    persistSession: false,
+    detectSessionInUrl: false,
+    flowType: 'pkce',
+    storageKey: 'ccv-roster-auth-token',
+  },
+  // Completely disable realtime to prevent WebSocket errors
+  realtime: {
+    params: {
+      eventsPerSecond: 0,
+    },
+  },
+  global: {
+    headers: {
+      'x-disable-realtime': 'true',
+    },
+  },
+});
 
 // Test connection on initialization (development only)
 if (import.meta.env.DEV) {
@@ -33,11 +50,24 @@ if (import.meta.env.DEV) {
 
       if (error) {
         console.error('Supabase connection error:', error);
-      } else {
-        console.log('Supabase connection successful');
       }
     } catch (err: unknown) {
       console.error('Supabase connection failed:', err);
     }
   })();
 }
+
+// Helper function to get current session
+export const getCurrentSession = () => {
+  return supabase.auth.getSession();
+};
+
+// Helper function to get current user
+export const getCurrentUser = () => {
+  return supabase.auth.getUser();
+};
+
+// Helper function to refresh session manually if needed
+export const refreshSession = () => {
+  return supabase.auth.refreshSession();
+};

@@ -437,15 +437,7 @@ export function usePhoneClipboardOptimized(
           const completeMetrics = metrics as PerformanceMetrics;
           setPerformanceMetrics(completeMetrics);
 
-          console.log('Clipboard operation performance:', {
-            totalTime: `${completeMetrics.totalTime.toFixed(2)}ms`,
-            selectionTime: `${completeMetrics.selectionTime.toFixed(2)}ms`,
-            formattingTime: `${completeMetrics.formattingTime.toFixed(2)}ms`,
-            clipboardTime: `${completeMetrics.clipboardTime.toFixed(2)}ms`,
-            phoneCount: completeMetrics.phoneCount,
-            chunkCount: completeMetrics.chunkCount,
-            memoryDelta: `${(completeMetrics.memoryAfter - completeMetrics.memoryBefore).toFixed(2)}MB`,
-          });
+          // Performance metrics tracked but not logged to reduce noise
         }
 
         return {

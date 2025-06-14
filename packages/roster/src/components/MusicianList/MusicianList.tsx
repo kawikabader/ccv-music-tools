@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMusicians } from '../../hooks/useMusicians';
 import { useAuth, useIsAdmin } from '../../utils/authSupabase';
 import { useNotification } from '../../context/NotificationContext';
 import type { Musician } from '../../types/supabase';
 import logoUrl from '../../assets/a.png';
+import { logger, LogCategory, userAction, componentMount, componentUnmount } from '../../utils/logger';
+import { MusicianForm } from '../Musicians/MusicianForm';
 
 interface MusicianListProps {
   musicians?: Musician[];
@@ -13,12 +16,15 @@ interface MusicianListProps {
 }
 
 export function MusicianList(props: MusicianListProps = {}) {
-  const {
-    musicians: propMusicians,
-    selectedIds = new Set(),
-    onToggleSelection,
-    isSelected
-  } = props;
+  const { musicians: propMusicians, selectedIds, onToggleSelection, isSelected } = props;
+
+  useEffect(() => {
+    document.title = 'Team Roster - Musicians';
+    componentMount('MusicianList');
+    return () => {
+      componentUnmount('MusicianList');
+    };
+  }, []);
   const { musicians: hookMusicians, loading, error, addMusician, updateMusician, deleteMusician } = useMusicians();
 
   // Use prop musicians if provided, otherwise use hook musicians
@@ -26,6 +32,7 @@ export function MusicianList(props: MusicianListProps = {}) {
   const { user, profile, signOut } = useAuth();
   const isAdmin = useIsAdmin();
   const { addNotification } = useNotification();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingMusician, setEditingMusician] = useState<Musician | null>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -123,9 +130,16 @@ export function MusicianList(props: MusicianListProps = {}) {
       .catch(console.error);
   }
 
-  function handleLogout() {
-    signOut();
-    setShowProfileMenu(false);
+  async function handleLogout() {
+    try {
+      await signOut();
+      setShowProfileMenu(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Still navigate to login even if sign out fails
+      navigate('/login');
+    }
   }
 
   async function handleCopyPhone(phone: string | null, name: string) {
@@ -193,7 +207,7 @@ export function MusicianList(props: MusicianListProps = {}) {
 
             {/* Dropdown Menu */}
             {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                 <div className="px-4 py-3 border-b border-gray-100">
                   <p className="text-sm font-medium text-gray-900">{profile?.name}</p>
                   <p className="text-sm text-gray-500 capitalize">{profile?.role}</p>
@@ -282,9 +296,16 @@ export function MusicianList(props: MusicianListProps = {}) {
               return (
                 <div
                   key={musician.id}
-                  className={`bg-white rounded-lg shadow p-4 flex items-center justify-between hover:shadow-md active:scale-[0.98] transition-all cursor-pointer relative touch-manipulation select-none ${isItemSelected ? 'ring-2 ring-indigo-500 bg-indigo-50' : ''
+                  className={`bg-white rounded-lg shadow p-4 flex items-center justify-between hover:shadow-md transition-all cursor-pointer relative touch-manipulation select-none ${isItemSelected ? 'ring-2 ring-indigo-500 bg-indigo-50' : ''
                     }`}
-                  onClick={() => onToggleSelection?.(musician.id)}
+                  onClick={() => {
+                    userAction('click', 'musician row', {
+                      musicianId: musician.id,
+                      musicianName: musician.name,
+                      wasSelected: isSelected?.(musician.id)
+                    });
+                    onToggleSelection?.(musician.id);
+                  }}
                   onKeyDown={(e) => handleKeyNavigation(e, filteredMusicians.indexOf(musician), musician.id)}
                   onTouchStart={(e) => {
                     // Prevent text selection on long press

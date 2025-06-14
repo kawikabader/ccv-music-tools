@@ -99,7 +99,7 @@ export function ClipboardToast({
   const styles = typeStyles[type];
 
   return (
-    <div className={`fixed ${positionClasses[position]} z-50 max-w-sm w-full px-4`}>
+    <div className={`fixed ${positionClasses[position]} z-50 ${position === 'top-center' ? 'max-w-xs' : 'max-w-sm'} w-full px-4`}>
       <div
         className={`
           ${styles.bg} ${styles.border}
@@ -107,6 +107,7 @@ export function ClipboardToast({
           transition-all duration-300 ease-in-out
           ${animationClasses[animation]}
           hover:shadow-2xl
+          ${position === 'top-center' ? 'mx-auto' : ''}
         `}
       >
         {/* Progress bar for loading state */}
@@ -119,8 +120,8 @@ export function ClipboardToast({
           </div>
         )}
 
-        <div className="p-4">
-          <div className="flex items-start space-x-3">
+        <div className={`${position === 'top-center' ? 'p-3' : 'p-4'}`}>
+          <div className={`flex items-start ${position === 'top-center' ? 'space-x-2' : 'space-x-3'}`}>
             {/* Status Icon */}
             <div className="flex-shrink-0 mt-0.5">
               {type === 'loading' ? (
@@ -151,17 +152,9 @@ export function ClipboardToast({
                   </div>
                 </div>
               ) : type === 'success' ? (
-                <div className="relative">
-                  <svg className={`h-5 w-5 ${styles.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {/* Success pulse animation */}
-                  <div className="absolute inset-0 animate-ping">
-                    <svg className={`h-5 w-5 ${styles.icon} opacity-30`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                </div>
+                <svg className={`h-5 w-5 ${styles.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
               ) : (
                 <svg className={`h-5 w-5 ${styles.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -171,11 +164,11 @@ export function ClipboardToast({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className={`text-sm font-semibold ${styles.text}`}>
+              <div className={`${position === 'top-center' ? 'text-xs' : 'text-sm'} font-semibold ${styles.text}`}>
                 {message}
               </div>
               {subtitle && (
-                <div className={`mt-1 text-xs ${styles.text} opacity-75`}>
+                <div className={`mt-1 ${position === 'top-center' ? 'text-xs opacity-60' : 'text-xs opacity-75'} ${styles.text}`}>
                   {subtitle}
                 </div>
               )}
@@ -234,9 +227,10 @@ export const ClipboardToastVariants = {
   copySuccess: (count: number, preview?: string) => ({
     type: 'success' as const,
     message: `📋 Copied ${count} phone number${count !== 1 ? 's' : ''}`,
-    subtitle: preview ? `${preview.substring(0, 30)}${preview.length > 30 ? '...' : ''}` : undefined,
-    animation: 'bounce' as const,
-    duration: 4000,
+    subtitle: preview ? `${preview.substring(0, 20)}${preview.length > 20 ? '...' : ''}` : undefined,
+    animation: 'fade' as const,
+    duration: 800,
+    position: 'top-center' as const,
   }),
 
   /**

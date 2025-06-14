@@ -288,7 +288,7 @@ export class ClipboardFallbacks {
       try {
         const result = await method();
         if (result) {
-          console.log(`✅ Clipboard fallback succeeded with ${name} method`);
+          // Clipboard fallback succeeded
           return true;
         }
       } catch (error) {

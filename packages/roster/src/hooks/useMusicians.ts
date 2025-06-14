@@ -1,22 +1,30 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Musician } from '../types/supabase';
+import { logger, LogCategory } from '../utils/logger';
 
 export function useMusicians() {
   const [musicians, setMusicians] = useState<Musician[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(true);
+
+  logger.info(LogCategory.HOOK, 'useMusicians hook initialized', {
+    loading,
+    musiciansCount: musicians.length,
+  });
 
   useEffect(() => {
+    setLoading(true);
+    logger.info(LogCategory.HOOK, 'useMusicians useEffect triggered', {
+      isMounted,
+    });
     fetchMusicians();
 
-    // Only subscribe to real-time changes in production or when explicitly enabled
+    // Subscribe to real-time changes (disabled by default to prevent WebSocket errors)
     let channel: any = null;
 
-    if (
-      import.meta.env.PROD ||
-      import.meta.env.VITE_ENABLE_REALTIME === 'true'
-    ) {
+    if (import.meta.env.VITE_ENABLE_REALTIME === 'true') {
       try {
         channel = supabase
           .channel('musicians_changes')
@@ -24,7 +32,7 @@ export function useMusicians() {
             'postgres_changes',
             { event: '*', schema: 'public', table: 'musicians' },
             payload => {
-              console.log('Change received!', payload);
+              // Real-time change received
               // Refetch on any change - let the loading state handle conflicts
               fetchMusicians();
             }
@@ -36,6 +44,7 @@ export function useMusicians() {
     }
 
     return () => {
+      setIsMounted(false);
       if (channel) {
         try {
           supabase.removeChannel(channel);
@@ -44,15 +53,35 @@ export function useMusicians() {
         }
       }
     };
-  }, []); // Empty dependency array is correct here since we only want this to run once
+  }, []);
 
   async function fetchMusicians() {
-    try {
-      console.log('🔄 Fetching musicians...');
+    setLoading(true);
+    logger.info(LogCategory.DATA, 'fetchMusicians started');
 
-      // Add timeout to prevent infinite loading
+    // Check current auth session for debugging
+    const { data: sessionData } = await supabase.auth.getSession();
+    logger.info(LogCategory.DATA, 'Current auth session', {
+      hasSession: !!sessionData.session,
+      userId: sessionData.session?.user?.id,
+      userEmail: sessionData.session?.user?.email,
+    });
+
+    try {
+      // Reasonable timeout to prevent hanging while allowing for slower connections
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => {
+        logger.warn(
+          LogCategory.DATA,
+          'Supabase request timeout (10s) - aborting'
+        );
+        controller.abort();
+      }, 10000); // 10 second timeout - more reasonable
+
+      logger.info(
+        LogCategory.DATA,
+        'Executing Supabase query: musicians.select(*)'
+      );
 
       const { data, error } = await supabase
         .from('musicians')
@@ -61,63 +90,62 @@ export function useMusicians() {
         .abortSignal(controller.signal);
 
       clearTimeout(timeoutId);
+      logger.info(LogCategory.DATA, 'Supabase query completed', {
+        hasData: !!data,
+        dataLength: data?.length,
+        hasError: !!error,
+      });
 
       if (error) {
-        console.error('❌ Supabase error:', error);
+        logger.error(LogCategory.DATA, 'Supabase query error', { error });
         throw error;
       }
 
-      console.log('✅ Musicians loaded:', data?.length || 0);
-      setMusicians(data || []);
-      setError(null);
+      logger.info(LogCategory.DATA, 'fetchMusicians success', {
+        dataCount: data?.length || 0,
+        isMounted,
+      });
+
+      // Only update state if component is still mounted
+      if (isMounted) {
+        setMusicians(data || []);
+        setError(null);
+        setLoading(false);
+      } else {
+        logger.warn(
+          LogCategory.DATA,
+          'Component unmounted - skipping state update'
+        );
+      }
     } catch (err) {
-      console.error('❌ Fetch error:', err);
       let errorMessage = 'An error occurred loading musicians';
 
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
           errorMessage =
             'Loading timed out. Please check your connection and try again.';
+        } else if (
+          err.message.includes('Missing Supabase environment variables')
+        ) {
+          errorMessage =
+            'Database connection not configured. Please check your environment variables.';
         } else {
           errorMessage = err.message;
         }
       }
 
-      setError(errorMessage);
+      logger.error(LogCategory.DATA, 'fetchMusicians error', {
+        errorMessage,
+        errorType: err instanceof Error ? err.name : 'Unknown',
+        isMounted,
+      });
 
-      // For development: provide sample data when Supabase connection fails
-      if (import.meta.env.DEV) {
-        console.log(
-          '🔧 Development mode: Using sample data due to connection error'
-        );
-        const sampleMusicians: Musician[] = [
-          {
-            id: '1',
-            name: 'John Doe',
-            instrument: 'Guitar',
-            phone: '(555) 123-4567',
-          },
-          {
-            id: '2',
-            name: 'Jane Smith',
-            instrument: 'Piano',
-            phone: '(555) 987-6543',
-          },
-          {
-            id: '3',
-            name: 'Bob Johnson',
-            instrument: 'Drums',
-            phone: '(555) 456-7890',
-          },
-          { id: '4', name: 'Alice Brown', instrument: 'Violin', phone: null },
-        ];
-        setMusicians(sampleMusicians);
-      } else {
-        // Set empty array on error to prevent stuck loading state
-        setMusicians([]);
+      // Only update state if component is still mounted
+      if (isMounted) {
+        setError(errorMessage);
+        setMusicians([]); // Set empty array on error
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
     }
   }
 

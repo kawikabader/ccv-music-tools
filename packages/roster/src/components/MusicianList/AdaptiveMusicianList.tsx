@@ -110,7 +110,7 @@ export function AdaptiveMusicianList(props: AdaptiveMusicianListProps = {}) {
 
   // Log debug info in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('AdaptiveMusicianList Debug:', debugInfo);
+    // Debug info available in React DevTools
   }
 
   // Render appropriate component based on virtualization decision

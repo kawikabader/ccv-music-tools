@@ -14,11 +14,14 @@ export function useMultiSelect() {
   const toggleSelection = useCallback((id: string) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(id)) {
+      const wasSelected = newSet.has(id);
+
+      if (wasSelected) {
         newSet.delete(id);
       } else {
         newSet.add(id);
       }
+
       return newSet;
     });
   }, []);

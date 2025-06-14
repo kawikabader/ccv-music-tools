@@ -362,7 +362,7 @@ export function useSessionCleanup(intervalMinutes = 30) {
 
     lastCleanup.current = Date.now();
 
-    console.log(`Session cleanup performed at ${new Date().toISOString()}`);
+    // Session cleanup performed
   }, [memoryOptimization.actions]);
 
   // Periodic cleanup
